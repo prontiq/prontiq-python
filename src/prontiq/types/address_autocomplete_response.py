@@ -146,10 +146,7 @@ class AddressAutocompleteResponse(BaseModel):
     """
 
     total: int
-    """
-    Total matching address records found for the query before the response `limit`
-    is applied. This can be greater than `suggestions.length`.
-    """
+    """Number of suggestions returned in this response."""
 
     debug: Optional[Debug] = None
     """Optional diagnostic metadata returned only when `debug=true` is supplied.
