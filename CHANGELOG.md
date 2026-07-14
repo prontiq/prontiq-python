@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.3.0 (2026-07-14)
+
+Full Changelog: [v0.2.1...v0.3.0](https://github.com/prontiq/prontiq-python/compare/v0.2.1...v0.3.0)
+
+### Features
+
+* [codex] Expand Enrich address response fields ([0434dcc](https://github.com/prontiq/prontiq-python/commit/0434dccd75c8c3cee37be254ff1e6418f39c4fef))
+* Tune autocomplete query path ([112a6b7](https://github.com/prontiq/prontiq-python/commit/112a6b73cbaf446ba5d1e95801a5ef21824dab82))
+
+
+### Bug Fixes
+
+* **internal:** resolve build failures ([7dc72ec](https://github.com/prontiq/prontiq-python/commit/7dc72ec8bd4a88ef6215ddc818dfab4f429f0b3f))
+
+
+### Documentation
+
+* **api:** add Address API data dictionary ([edcccf5](https://github.com/prontiq/prontiq-python/commit/edcccf50589e986268d6de413f282afc1e069092))
+
 ## 0.2.1 (2026-05-15)
 
 Full Changelog: [v0.2.0...v0.2.1](https://github.com/prontiq/prontiq-python/compare/v0.2.0...v0.2.1)
