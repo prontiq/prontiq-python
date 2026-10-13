@@ -178,5 +178,7 @@ def test_unexpected_status_raises():
 
 
 def test_missing_required_fallback_is_rejected():
+    record = dict(SITE["address"])
+    del record["fallbackGeocode"]
     with pytest.raises(KeyError, match="fallbackGeocode"):
-        AddressDocument.from_dict({"id": "invalid"})
+        AddressDocument.from_dict(record)

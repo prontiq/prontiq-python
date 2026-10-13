@@ -32,4 +32,4 @@ target-version = "py311"
 
 [tool.mypy]
 files = ["src/prontiq"]
-check_untyped_defs = true
+strict = true
