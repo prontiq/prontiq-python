@@ -1,0 +1,3297 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Prontiq API",
+        "version": "2.0.0",
+        "license": {
+            "name": "Proprietary",
+            "url": "https://prontiq.dev"
+        },
+        "description": "Prontiq provides authenticated APIs for Australian address search, validation, enrichment, reverse geocoding, and locality lookup. Authenticate public data requests with `X-Api-Key`. Successful Address API calls may include rate-limit and credit-usage headers. Errors use a stable `{ error: { code, message, status, request_id } }` envelope; `request_id` is intentionally snake_case for v1 compatibility."
+    },
+    "tags": [
+        {
+            "name": "Address",
+            "description": "Australian address autocomplete, validation, enrichment, reverse geocoding, postcode lookup, and suburb lookup."
+        }
+    ],
+    "servers": [
+        {
+            "url": "https://api.prontiq.dev",
+            "description": "Production API"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "ApiKeyAuth": {
+                "type": "apiKey",
+                "in": "header",
+                "name": "X-Api-Key"
+            }
+        },
+        "schemas": {
+            "AutocompleteAddressResponse": {
+                "type": "object",
+                "properties": {
+                    "suggestions": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AddressSuggestion"
+                        },
+                        "description": "Suggested address records ordered for autocomplete display. The array may be empty when no candidate addresses match the query."
+                    },
+                    "total": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Number of suggestions returned in this response.",
+                        "example": 3
+                    },
+                    "debug": {
+                        "$ref": "#/components/schemas/DebugInfo"
+                    }
+                },
+                "required": [
+                    "suggestions",
+                    "total"
+                ],
+                "description": "Autocomplete suggestions for a partial address query. Suggestions include Prontiq-computed match quality; G-NAF confidence and internal search relevance are not returned in default responses."
+            },
+            "AddressSuggestion": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Opaque G-NAF persistent identifier for this suggestion. Store it when a user selects the suggestion, then pass it to Enrich for the full address document.",
+                        "example": "GAQLD156786950"
+                    },
+                    "addressLabel": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Formatted street-address line for display in autocomplete results.",
+                                "example": "9 ENDEAVOUR COURT"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "localityName": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Official suburb or locality name for the suggested address.",
+                                "example": "LAMMERMOOR"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "state": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/AustralianStateCode"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "postcode": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/Postcode"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "prontiqMatchScore": {
+                        "$ref": "#/components/schemas/ProntiqMatchScore"
+                    },
+                    "prontiqMatchQuality": {
+                        "$ref": "#/components/schemas/ProntiqMatchQuality"
+                    },
+                    "debug": {
+                        "$ref": "#/components/schemas/DebugInfo"
+                    }
+                },
+                "required": [
+                    "id",
+                    "prontiqMatchScore",
+                    "prontiqMatchQuality"
+                ],
+                "description": "Autocomplete suggestion containing display fields and Prontiq-computed match quality. G-NAF confidence and internal search relevance are not returned in default suggestions.",
+                "example": {
+                    "id": "GAQLD156786950",
+                    "addressLabel": "9 ENDEAVOUR COURT",
+                    "localityName": "LAMMERMOOR",
+                    "state": "QLD",
+                    "postcode": "4703",
+                    "prontiqMatchScore": 92,
+                    "prontiqMatchQuality": "high"
+                }
+            },
+            "AustralianStateCode": {
+                "type": "string",
+                "enum": [
+                    "NSW",
+                    "VIC",
+                    "QLD",
+                    "SA",
+                    "WA",
+                    "TAS",
+                    "NT",
+                    "ACT",
+                    "OT"
+                ],
+                "description": "Uppercase Australian state or territory code returned by the Address API. Allowed values are `NSW` New South Wales, `VIC` Victoria, `QLD` Queensland, `SA` South Australia, `WA` Western Australia, `TAS` Tasmania, `NT` Northern Territory, `ACT` Australian Capital Territory, and `OT` Other Territories.",
+                "example": "QLD"
+            },
+            "Postcode": {
+                "type": "string",
+                "pattern": "^\\d{4}$",
+                "description": "Four-digit Australian postcode. Store postcodes as strings; integer coercion can remove leading zeroes used by some Australian postcodes.",
+                "example": "4703"
+            },
+            "ProntiqMatchScore": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Prontiq-computed request match score from 0 to 100. Use it to decide whether to accept, confirm, or reject a returned address for the submitted request. It is not G-NAF source confidence, deliverability, or geocode precision.",
+                "example": 92
+            },
+            "ProntiqMatchQuality": {
+                "type": "string",
+                "enum": [
+                    "high",
+                    "medium",
+                    "low",
+                    "none"
+                ],
+                "description": "Human-readable Prontiq match-quality bucket derived from `prontiqMatchScore`: `high` is 67-100, `medium` is 34-66, `low` is 1-33, and `none` is 0.",
+                "example": "high"
+            },
+            "DebugInfo": {
+                "type": "object",
+                "properties": {
+                    "scoringVersion": {
+                        "type": "string",
+                        "enum": [
+                            "address-match-v1"
+                        ],
+                        "description": "Version of the public Prontiq match-scoring algorithm used for diagnostics.",
+                        "example": "address-match-v1"
+                    },
+                    "queryMode": {
+                        "type": "string",
+                        "enum": [
+                            "autocomplete",
+                            "validate",
+                            "enrich",
+                            "reverse",
+                            "lookup"
+                        ],
+                        "description": "Address API operation mode that produced this diagnostic object.",
+                        "example": "autocomplete"
+                    },
+                    "matchedComponents": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string",
+                            "enum": [
+                                "exact",
+                                "prefix",
+                                "fuzzy",
+                                "none"
+                            ]
+                        },
+                        "description": "Per-component match classification for diagnostics. Shape may evolve between scoring versions.",
+                        "example": {
+                            "streetNumber": "exact",
+                            "streetName": "prefix",
+                            "locality": "exact"
+                        }
+                    },
+                    "scoreCaps": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Diagnostic list of caps applied to the score, such as explicit postcode or state mismatches.",
+                        "example": [
+                            "explicitPostcodeMismatch"
+                        ]
+                    },
+                    "searchScore": {
+                        "type": "number",
+                        "description": "Internal search relevance score when available. This value is unstable and must not be stored, sorted by, or used for business decisions.",
+                        "format": "double",
+                        "example": 42.1
+                    }
+                },
+                "required": [
+                    "scoringVersion",
+                    "queryMode"
+                ],
+                "description": "Optional diagnostic metadata returned only when `debug=true` is supplied. Debug values are for support and troubleshooting, not production decision-making.",
+                "example": {
+                    "scoringVersion": "address-match-v1",
+                    "queryMode": "autocomplete",
+                    "searchScore": 42.1
+                }
+            },
+            "AddressErrorResponse": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "object",
+                        "properties": {
+                            "code": {
+                                "$ref": "#/components/schemas/AddressErrorCode"
+                            },
+                            "message": {
+                                "type": "string",
+                                "description": "Human-readable error message.",
+                                "example": "Invalid query parameters"
+                            },
+                            "status": {
+                                "type": "integer",
+                                "description": "HTTP status code.",
+                                "example": 400
+                            },
+                            "request_id": {
+                                "type": "string",
+                                "description": "Request identifier for support and debugging. This snake_case field is stable in v1.",
+                                "example": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                            },
+                            "details": {
+                                "type": "object",
+                                "additionalProperties": {},
+                                "description": "Optional structured details. Shape depends on the error code.",
+                                "example": {
+                                    "q": [
+                                        "Required"
+                                    ]
+                                }
+                            }
+                        },
+                        "required": [
+                            "code",
+                            "message",
+                            "status",
+                            "request_id"
+                        ],
+                        "description": "Nested error object containing the machine code, human message, HTTP status, and request id.",
+                        "example": {
+                            "code": "INVALID_PARAMETERS",
+                            "message": "Invalid query parameters",
+                            "status": 400,
+                            "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                        }
+                    }
+                },
+                "required": [
+                    "error"
+                ],
+                "description": "Standard public Address API error envelope. The nested `error.request_id` field is intentionally snake_case in v1."
+            },
+            "AddressErrorCode": {
+                "type": "string",
+                "enum": [
+                    "INVALID_API_KEY",
+                    "MISSING_API_KEY",
+                    "RATE_LIMITED",
+                    "QUOTA_EXCEEDED",
+                    "PRODUCT_NOT_ALLOWED",
+                    "INVALID_PARAMETERS",
+                    "NOT_FOUND",
+                    "INTERNAL_ERROR"
+                ],
+                "description": "Stable machine-readable public Address API error code. Use this value for branching instead of parsing the human-readable `message`.",
+                "example": "INVALID_PARAMETERS"
+            },
+            "AustralianStateCodeQuery": {
+                "type": "string",
+                "pattern": "^([Nn][Ss][Ww]|[Vv][Ii][Cc]|[Qq][Ll][Dd]|[Ss][Aa]|[Ww][Aa]|[Tt][Aa][Ss]|[Nn][Tt]|[Aa][Cc][Tt]|[Oo][Tt])$",
+                "description": "Australian state or territory filter. Allowed values are `NSW`, `VIC`, `QLD`, `SA`, `WA`, `TAS`, `NT`, `ACT`, and `OT`. Input is case-insensitive and responses normalize state codes to uppercase.",
+                "example": "QLD"
+            },
+            "AddressDebugQuery": {
+                "type": "string",
+                "enum": [
+                    "true",
+                    "false"
+                ],
+                "description": "Optional diagnostic flag. Send exactly `true` or `false`. Invalid values are rejected; debug diagnostics are for support only and must not be used for business decisions.",
+                "example": "false"
+            },
+            "ValidateAddressResponse": {
+                "type": "object",
+                "properties": {
+                    "match": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/AddressDocument"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "description": "Best matching full address document, or `null` when the submitted address does not resolve to a usable G-NAF record."
+                    },
+                    "prontiqMatchScore": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 100,
+                        "description": "Prontiq-computed request match score from 0 to 100. Use it to decide whether to accept the match, ask the user to confirm, or request correction.",
+                        "example": 92
+                    },
+                    "prontiqMatchQuality": {
+                        "type": "string",
+                        "enum": [
+                            "high",
+                            "medium",
+                            "low",
+                            "none"
+                        ],
+                        "description": "Human-readable Prontiq match-quality bucket derived from `prontiqMatchScore`. This is distinct from `match.confidence`, which is G-NAF source-record metadata.",
+                        "example": "high"
+                    },
+                    "debug": {
+                        "$ref": "#/components/schemas/DebugInfo"
+                    }
+                },
+                "required": [
+                    "match",
+                    "prontiqMatchScore",
+                    "prontiqMatchQuality"
+                ],
+                "description": "Best address match and Prontiq match-quality classification for a submitted address string."
+            },
+            "AddressDocument": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Opaque G-NAF persistent identifier for this address record. Store it as a string and pass it to Enrich when you need the full public address document.",
+                        "example": "GAQLD156786950"
+                    },
+                    "addressLabel": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Formatted street-address line for display and form population. It usually contains the street number, street name, and any unit or building text available in the source record.",
+                                "example": "9 ENDEAVOUR COURT"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "localityName": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Official suburb or locality name associated with the address.",
+                                "example": "LAMMERMOOR"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "state": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/AustralianStateCode"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "postcode": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/Postcode"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "confidence": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/GnafConfidence"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "geocode": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/Geocode"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "fallbackGeocode": {
+                        "$ref": "#/components/schemas/FallbackGeocode"
+                    },
+                    "location": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/Location"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "boundaries": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/AddressBoundaries"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "fallbackGeocode"
+                ],
+                "description": "Standard public address record returned by Validate and Reverse geocode, and used as the base for Enrich. Optional fields may be absent or null when the source data does not provide that attribute.",
+                "example": {
+                    "id": "GAQLD156786950",
+                    "addressLabel": "9 ENDEAVOUR COURT",
+                    "localityName": "LAMMERMOOR",
+                    "state": "QLD",
+                    "postcode": "4703",
+                    "confidence": 2,
+                    "fallbackGeocode": null
+                }
+            },
+            "GnafConfidence": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2,
+                "description": "G-NAF source-record confidence metadata. `0`, `1`, and `2` indicate one, two, or three supporting contributor datasets. This is provenance metadata, not Prontiq match quality.",
+                "example": 2,
+                "x-field-note": "This is G-NAF source-record confidence, not `prontiqMatchScore` or `prontiqMatchQuality`. Autocomplete suggestions do not expose this field."
+            },
+            "Geocode": {
+                "type": "object",
+                "properties": {
+                    "latitude": {
+                        "$ref": "#/components/schemas/Coordinate"
+                    },
+                    "longitude": {
+                        "$ref": "#/components/schemas/Coordinate"
+                    },
+                    "type": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "G-NAF geocoding method when supplied by the source record, such as a frontage or property centroid. Coarse defaults are returned separately in fallbackGeocode.",
+                                "example": "PROPERTY CENTROID"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "reliability": {
+                        "anyOf": [
+                            {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 6,
+                                "description": "G-NAF geocode reliability code from 1 to 6, where lower values indicate more precise location evidence. Treat this as geocode precision metadata, not address match quality.",
+                                "example": 2,
+                                "x-field-note": "Lower is better: a smaller reliability number indicates a more precise geocode."
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "latitude",
+                    "longitude"
+                ],
+                "description": "G-NAF geocoding metadata and decimal-degree coordinates for the address.",
+                "example": {
+                    "latitude": -23.1601,
+                    "longitude": 150.7596,
+                    "type": "PROPERTY CENTROID",
+                    "reliability": 2
+                }
+            },
+            "Coordinate": {
+                "type": "number",
+                "description": "GDA2020 (EPSG:7844) decimal-degree coordinate used for Australian address locations and reverse-geocode queries.",
+                "format": "double",
+                "example": -23.1601
+            },
+            "FallbackGeocode": {
+                "type": [
+                    "object",
+                    "null"
+                ],
+                "properties": {
+                    "latitude": {
+                        "type": "number",
+                        "minimum": -44,
+                        "maximum": -9,
+                        "description": "Default latitude in native GDA2020 (EPSG:7844) decimal degrees.",
+                        "format": "double",
+                        "example": -12.20477449
+                    },
+                    "longitude": {
+                        "type": "number",
+                        "minimum": 96,
+                        "maximum": 168,
+                        "description": "Default longitude in native GDA2020 (EPSG:7844) decimal degrees.",
+                        "format": "double",
+                        "example": 96.84370912
+                    },
+                    "typeCode": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "G-NAF default geocode type code: STL for street, LOC for locality, or another source code.",
+                        "example": "STL"
+                    },
+                    "type": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "G-NAF default geocode type label.",
+                        "example": "STREET LOCALITY"
+                    },
+                    "source": {
+                        "type": "string",
+                        "enum": [
+                            "GNAF_DEFAULT"
+                        ],
+                        "description": "Identifies the default geocode source.",
+                        "example": "GNAF_DEFAULT"
+                    },
+                    "precision": {
+                        "type": "string",
+                        "enum": [
+                            "street",
+                            "locality",
+                            "unknown"
+                        ],
+                        "description": "Coarse spatial precision. Unknown means the source type is neither STL nor LOC.",
+                        "example": "street"
+                    }
+                },
+                "required": [
+                    "latitude",
+                    "longitude",
+                    "typeCode",
+                    "type",
+                    "source",
+                    "precision"
+                ],
+                "description": "Default coordinates only when a primary site point is unavailable; otherwise null.",
+                "example": null
+            },
+            "Location": {
+                "type": "object",
+                "properties": {
+                    "lat": {
+                        "$ref": "#/components/schemas/Coordinate"
+                    },
+                    "lon": {
+                        "$ref": "#/components/schemas/Coordinate"
+                    }
+                },
+                "required": [
+                    "lat",
+                    "lon"
+                ],
+                "description": "Compact latitude/longitude point used for proximity workflows and map display.",
+                "example": {
+                    "lat": -23.1601,
+                    "lon": 150.7596
+                }
+            },
+            "AddressBoundaries": {
+                "type": "object",
+                "properties": {
+                    "lga": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/NamedArea"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "stateElectorate": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/NamedArea"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "commonwealthElectorate": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/NamedArea"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "meshBlock": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/MeshBlock"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "sa2": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/NamedArea"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "sa3": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/NamedArea"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "sa4": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/NamedArea"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "gccsa": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/NamedArea"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "description": "Administrative, electoral, and ABS statistical geography linked to the address when supplied by G-NAF and ABS source data. Census boundaries use ASGS 2026. Null boundaries are valid where no polygon matches. Boundary values can change between official data releases without the address `id` changing.",
+                "example": {
+                    "lga": {
+                        "name": "Livingstone Shire"
+                    },
+                    "stateElectorate": {
+                        "name": "Keppel"
+                    },
+                    "commonwealthElectorate": {
+                        "name": "Capricornia"
+                    },
+                    "meshBlock": {
+                        "code": "30000000000",
+                        "category": "Residential"
+                    },
+                    "sa2": {
+                        "name": "Yeppoon",
+                        "code": "308011188"
+                    },
+                    "sa3": {
+                        "name": "Rockhampton",
+                        "code": "30801"
+                    },
+                    "sa4": {
+                        "name": "Central Queensland",
+                        "code": "308"
+                    }
+                }
+            },
+            "NamedArea": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Official administrative, electoral, or statistical area name.",
+                        "example": "Yeppoon"
+                    },
+                    "code": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Official ABS, electoral, or administrative area code when supplied by the source dataset.",
+                                "example": "308011188"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "name"
+                ],
+                "description": "Named administrative, electoral, or statistical area associated with an address.",
+                "example": {
+                    "name": "Yeppoon",
+                    "code": "308011188"
+                }
+            },
+            "MeshBlock": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "ABS Mesh Block code. Mesh Blocks are the smallest Australian Bureau of Statistics geographic areas used to build larger statistical regions.",
+                        "example": "30000000000"
+                    },
+                    "category": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "ABS Mesh Block land-use category when available, such as Residential, Commercial, Parkland, or Education.",
+                                "example": "Residential"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "code"
+                ],
+                "description": "ABS Mesh Block identifier and optional land-use category for the address location.",
+                "example": {
+                    "code": "30000000000",
+                    "category": "Residential"
+                }
+            },
+            "EnrichAddressResponse": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/EnrichedAddressDocument"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "debug": {
+                                "$ref": "#/components/schemas/DebugInfo"
+                            }
+                        }
+                    }
+                ],
+                "description": "Enrich-only address document with structured components, extra geocodes, locality and street context, aliases, secondaries, extended boundaries, and optional diagnostic metadata when debug=true.",
+                "example": {
+                    "id": "GAVIC411087566",
+                    "addressLabel": "FLAT 14, 5 DUKE STREET",
+                    "localityName": "CAULFIELD SOUTH",
+                    "state": "VIC",
+                    "postcode": "3162",
+                    "confidence": 2,
+                    "fallbackGeocode": null,
+                    "sourceDataRelease": "2026.08",
+                    "addressRole": "SECONDARY",
+                    "legalParcelId": "14\\PS349838",
+                    "components": {
+                        "flatType": "FLAT",
+                        "flatNumber": "14",
+                        "streetNumberFirst": "5",
+                        "streetName": "DUKE",
+                        "streetType": "STREET"
+                    },
+                    "boundaries": {
+                        "lga": {
+                            "name": "Glen Eira",
+                            "code": "lga9bd137c30d17"
+                        },
+                        "ward": {
+                            "name": "Bambra Ward"
+                        },
+                        "sa1": "20802117831"
+                    }
+                }
+            },
+            "EnrichedAddressBoundaries": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/AddressBoundaries"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "sa1": {
+                                "anyOf": [
+                                    {
+                                        "type": "string",
+                                        "description": "ABS Statistical Area Level 1 code when available. SA1 is useful for downstream statistical joins such as SEIFA.",
+                                        "example": "20802117831"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            },
+                            "ward": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Ward"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "description": "Administrative, electoral, and ABS geography returned by Enrich. This is a strict superset of the standard address boundary object.",
+                "example": {
+                    "lga": {
+                        "name": "Glen Eira",
+                        "code": "lga9bd137c30d17"
+                    },
+                    "ward": {
+                        "name": "Bambra Ward"
+                    },
+                    "meshBlock": {
+                        "code": "20192490000",
+                        "category": "Residential"
+                    },
+                    "sa1": "20802117831",
+                    "sa2": {
+                        "name": "Caulfield - South",
+                        "code": "208021178"
+                    }
+                }
+            },
+            "Ward": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Council ward name when available.",
+                                "example": "Bambra Ward"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "description": "Council ward associated with an enriched address when available.",
+                "example": {
+                    "name": "Bambra Ward"
+                }
+            },
+            "AddressComponents": {
+                "type": "object",
+                "properties": {
+                    "addressSiteName": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Site name associated with the address when available, such as a shopping centre, hospital, or campus.",
+                                "example": "Footscray Market"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "buildingName": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Building name associated with the address when available.",
+                                "example": "Tower A"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "flatType": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Unit, flat, shop, or suite type when the address has a subaddress component.",
+                                "example": "UNIT"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "flatNumber": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Unit, flat, shop, or suite number without the type prefix.",
+                                "example": "14"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "levelType": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Level type when the address has a floor or level component.",
+                                "example": "LEVEL"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "levelNumber": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Level or floor number without the level type prefix.",
+                                "example": "1"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "lotNumber": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Lot number for rural, unsubdivided, or lot-based addressing when available.",
+                                "example": "3"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "streetNumberFirst": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "First or only street number for the address.",
+                                "example": "5"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "streetNumberLast": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Last street number when the address is represented as a range.",
+                                "example": "9"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "streetName": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Street name without street type or suffix.",
+                                "example": "DUKE"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "streetType": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Street type in its expanded public form when available.",
+                                "example": "STREET"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "streetSuffix": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Street suffix or directional suffix when available.",
+                                "example": "NORTH"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "description": "Structured address components when available for the enriched record.",
+                "example": {
+                    "flatType": "FLAT",
+                    "flatNumber": "14",
+                    "streetNumberFirst": "5",
+                    "streetName": "DUKE",
+                    "streetType": "STREET"
+                }
+            },
+            "AllGeocode": {
+                "type": "object",
+                "properties": {
+                    "latitude": {
+                        "$ref": "#/components/schemas/Coordinate"
+                    },
+                    "longitude": {
+                        "$ref": "#/components/schemas/Coordinate"
+                    },
+                    "type": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Geocode method or level for this additional geocode when available.",
+                                "example": "FRONTAGE CENTRE SETBACK"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "reliability": {
+                        "anyOf": [
+                            {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 6,
+                                "description": "Source geocode reliability value when available. Lower values usually indicate more precise location evidence.",
+                                "example": 2
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "latitude",
+                    "longitude"
+                ],
+                "description": "One geocode associated with an enriched address record. Enrich preserves the source order after filtering invalid coordinates.",
+                "example": {
+                    "latitude": -37.89180933,
+                    "longitude": 145.01510717,
+                    "type": "FRONTAGE CENTRE SETBACK",
+                    "reliability": 2
+                }
+            },
+            "LocalityContext": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Public locality identifier when available.",
+                                "example": "loc1b5a0e70afd4"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "classification": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Locality classification label when available.",
+                                "example": "GAZETTED LOCALITY"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "neighbours": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Neighbouring locality names when available.",
+                        "example": [
+                            "ELSTERNWICK",
+                            "GARDENVALE",
+                            "ORMOND"
+                        ]
+                    },
+                    "aliases": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Alternative locality names when available.",
+                        "example": [
+                            "FOOTSCRAY WEST"
+                        ]
+                    }
+                },
+                "description": "Locality context when available for the enriched address.",
+                "example": {
+                    "id": "loc1b5a0e70afd4",
+                    "classification": "GAZETTED LOCALITY",
+                    "neighbours": [
+                        "ELSTERNWICK",
+                        "GARDENVALE",
+                        "ORMOND"
+                    ],
+                    "aliases": []
+                }
+            },
+            "StreetContext": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Public street identifier when available.",
+                                "example": "VIC1953679"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "classification": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Street classification or confirmation label when available.",
+                                "example": "CONFIRMED"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "aliases": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Alternative street names when available.",
+                        "example": [
+                            "OLD DUKE STREET"
+                        ]
+                    }
+                },
+                "description": "Street context when available for the enriched address.",
+                "example": {
+                    "id": "VIC1953679",
+                    "classification": "CONFIRMED",
+                    "aliases": []
+                }
+            },
+            "AddressAlias": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Public identifier for the alternate address record when available.",
+                                "example": "MA13517230"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "addressLabel": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Alternate display label for the address.",
+                                "example": "SHOP 1 GROUND 1 MCNAB AVENUE"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "type": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Alias type label when available.",
+                                "example": "SYNONYM"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "description": "Alternative address label associated with the enriched address.",
+                "example": {
+                    "id": "MA13517230",
+                    "addressLabel": "SHOP 1 GROUND 1 MCNAB AVENUE",
+                    "type": "SYNONYM"
+                }
+            },
+            "SecondaryAddress": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Public identifier for the secondary address record when available.",
+                                "example": "GAVIC425495838"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "addressLabel": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "description": "Display label for the secondary address.",
+                                "example": "SHOP 1 1 MCNAB AVENUE"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "description": "Secondary or child address associated with an enriched primary address.",
+                "example": {
+                    "id": "GAVIC425495838",
+                    "addressLabel": "SHOP 1 1 MCNAB AVENUE"
+                }
+            },
+            "EnrichedAddressDocument": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/AddressDocument"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "boundaries": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/EnrichedAddressBoundaries"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            },
+                            "sourceDataRelease": {
+                                "anyOf": [
+                                    {
+                                        "type": "string",
+                                        "description": "Source data release or version used to produce the enriched address record when available. This is not the Prontiq API version.",
+                                        "example": "2026.08"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            },
+                            "addressRole": {
+                                "anyOf": [
+                                    {
+                                        "type": "string",
+                                        "enum": [
+                                            "PRIMARY",
+                                            "SECONDARY"
+                                        ],
+                                        "description": "Primary or secondary address role when available. Primary records are parent or building-level addresses; secondary records are child or unit-level addresses.",
+                                        "example": "SECONDARY"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            },
+                            "components": {
+                                "$ref": "#/components/schemas/AddressComponents"
+                            },
+                            "legalParcelId": {
+                                "anyOf": [
+                                    {
+                                        "type": "string",
+                                        "description": "Parcel or legal-property reference when available for the address. Coverage varies by address and source data.",
+                                        "example": "14\\PS349838"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            },
+                            "allGeocodes": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/AllGeocode"
+                                },
+                                "description": "Additional geocodes associated with the address. The array preserves source order after invalid coordinates are removed.",
+                                "example": [
+                                    {
+                                        "latitude": -37.89180933,
+                                        "longitude": 145.01510717,
+                                        "type": "FRONTAGE CENTRE SETBACK",
+                                        "reliability": 2
+                                    },
+                                    {
+                                        "latitude": -37.89180905,
+                                        "longitude": 145.01490263,
+                                        "type": "PROPERTY CENTROID",
+                                        "reliability": 2
+                                    }
+                                ]
+                            },
+                            "locality": {
+                                "$ref": "#/components/schemas/LocalityContext"
+                            },
+                            "street": {
+                                "$ref": "#/components/schemas/StreetContext"
+                            },
+                            "aliases": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/AddressAlias"
+                                },
+                                "description": "Alternative address labels associated with the enriched address."
+                            },
+                            "secondaries": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/SecondaryAddress"
+                                },
+                                "description": "Secondary or child addresses associated with the enriched address."
+                            }
+                        }
+                    }
+                ],
+                "description": "Enrich-only address document with structured components, extra geocodes, locality and street context, aliases, secondaries, and extended boundaries.",
+                "example": {
+                    "id": "GAVIC411087566",
+                    "addressLabel": "FLAT 14, 5 DUKE STREET",
+                    "localityName": "CAULFIELD SOUTH",
+                    "state": "VIC",
+                    "postcode": "3162",
+                    "confidence": 2,
+                    "fallbackGeocode": null,
+                    "sourceDataRelease": "2026.08",
+                    "addressRole": "SECONDARY",
+                    "legalParcelId": "14\\PS349838",
+                    "components": {
+                        "flatType": "FLAT",
+                        "flatNumber": "14",
+                        "streetNumberFirst": "5",
+                        "streetName": "DUKE",
+                        "streetType": "STREET"
+                    },
+                    "boundaries": {
+                        "lga": {
+                            "name": "Glen Eira",
+                            "code": "lga9bd137c30d17"
+                        },
+                        "ward": {
+                            "name": "Bambra Ward"
+                        },
+                        "sa1": "20802117831"
+                    }
+                }
+            },
+            "ReverseGeocodeAddressResponse": {
+                "type": "object",
+                "properties": {
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ReverseAddressResult"
+                        },
+                        "description": "Nearby address documents sorted by distance from the submitted coordinate. The array may be empty when no address falls within the radius."
+                    },
+                    "total": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Total address records found within the requested radius.",
+                        "example": 1
+                    },
+                    "debug": {
+                        "$ref": "#/components/schemas/DebugInfo"
+                    }
+                },
+                "required": [
+                    "results",
+                    "total"
+                ],
+                "description": "Addresses nearest to the supplied latitude and longitude."
+            },
+            "ReverseAddressResult": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/AddressDocument"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "distance_m": {
+                                "type": "number",
+                                "description": "Distance from the submitted reverse-geocode coordinate to this address point, measured in metres.",
+                                "format": "double",
+                                "example": 0
+                            }
+                        }
+                    }
+                ],
+                "description": "Address document plus distance from the reverse-geocode query point.",
+                "example": {
+                    "id": "GAQLD156786950",
+                    "addressLabel": "9 ENDEAVOUR COURT",
+                    "localityName": "LAMMERMOOR",
+                    "state": "QLD",
+                    "postcode": "4703",
+                    "distance_m": 0
+                }
+            },
+            "PostcodeLookupResponse": {
+                "type": "object",
+                "properties": {
+                    "postcode": {
+                        "$ref": "#/components/schemas/Postcode"
+                    },
+                    "localities": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PostcodeLocalitySummary"
+                        },
+                        "description": "Localities that contain address records for the requested postcode, ordered by the lookup implementation.",
+                        "example": [
+                            {
+                                "name": "SYDNEY",
+                                "state": "NSW",
+                                "address_count": 12345
+                            }
+                        ]
+                    },
+                    "debug": {
+                        "$ref": "#/components/schemas/DebugInfo"
+                    }
+                },
+                "required": [
+                    "postcode",
+                    "localities"
+                ],
+                "description": "Localities and address counts for an Australian postcode."
+            },
+            "PostcodeLocalitySummary": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Official suburb or locality name associated with the postcode.",
+                        "example": "SYDNEY"
+                    },
+                    "state": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/AustralianStateCode"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "description": "Australian state or territory for the locality when available. The value is uppercase in responses.",
+                        "example": "NSW"
+                    },
+                    "address_count": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Number of address records in this locality for the requested postcode. This is dataset cardinality, not credit usage.",
+                        "example": 12345
+                    }
+                },
+                "required": [
+                    "name",
+                    "address_count"
+                ],
+                "description": "Locality summary returned for a postcode lookup.",
+                "example": {
+                    "name": "SYDNEY",
+                    "state": "NSW",
+                    "address_count": 12345
+                }
+            },
+            "SuburbLookupResponse": {
+                "type": "object",
+                "properties": {
+                    "suburb": {
+                        "type": "string",
+                        "description": "Normalized suburb or locality name returned in uppercase.",
+                        "example": "SYDNEY"
+                    },
+                    "state": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/AustralianStateCode"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "description": "Australian state or territory used to disambiguate the locality when available. The value is uppercase in responses.",
+                        "example": "NSW"
+                    },
+                    "postcodes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Postcode"
+                        },
+                        "description": "Postcodes associated with this suburb or locality.",
+                        "example": [
+                            "2000"
+                        ]
+                    },
+                    "bounds": {
+                        "$ref": "#/components/schemas/GeoBounds"
+                    },
+                    "address_count": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Total address records in this suburb or locality. This is dataset cardinality, not credit usage.",
+                        "example": 12345
+                    },
+                    "debug": {
+                        "$ref": "#/components/schemas/DebugInfo"
+                    }
+                },
+                "required": [
+                    "suburb",
+                    "postcodes",
+                    "address_count"
+                ],
+                "description": "Postcodes, bounds, and address count for a suburb or locality."
+            },
+            "GeoBounds": {
+                "type": "object",
+                "properties": {
+                    "top_left": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Location"
+                            },
+                            {
+                                "description": "North-west corner of the locality bounding box. The field name is snake_case for v1 wire compatibility.",
+                                "example": {
+                                    "lat": -33.8568,
+                                    "lon": 151.2001
+                                }
+                            }
+                        ]
+                    },
+                    "bottom_right": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Location"
+                            },
+                            {
+                                "description": "South-east corner of the locality bounding box. The field name is snake_case for v1 wire compatibility.",
+                                "example": {
+                                    "lat": -33.8812,
+                                    "lon": 151.2204
+                                }
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "top_left",
+                    "bottom_right"
+                ],
+                "description": "Approximate bounding box for the suburb or locality when available.",
+                "example": {
+                    "top_left": {
+                        "lat": -33.8568,
+                        "lon": 151.2001
+                    },
+                    "bottom_right": {
+                        "lat": -33.8812,
+                        "lon": 151.2204
+                    }
+                }
+            }
+        },
+        "parameters": {}
+    },
+    "paths": {
+        "/v1/address/autocomplete": {
+            "get": {
+                "operationId": "autocompleteAddress",
+                "tags": [
+                    "Address"
+                ],
+                "summary": "Autocomplete addresses",
+                "description": "Suggest Australian addresses as a user types. Use this endpoint for typeahead UI flows, then pass the selected `id` to [Enrich](/api-reference/enrich) when you need coordinates, boundaries, and full record metadata. Suggestions include Prontiq match-quality fields; G-NAF confidence and internal search relevance are omitted from default responses.",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200,
+                            "description": "Partial address text typed by the user. Send 1-200 characters; omit coordinates and use `state` when you already know the state.",
+                            "example": "9 endeavour cou"
+                        },
+                        "required": true,
+                        "description": "Partial address text typed by the user. Send 1-200 characters; omit coordinates and use `state` when you already know the state.",
+                        "name": "q",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "$ref": "#/components/schemas/AustralianStateCodeQuery"
+                        },
+                        "required": false,
+                        "description": "Australian state or territory filter. Allowed values are `NSW`, `VIC`, `QLD`, `SA`, `WA`, `TAS`, `NT`, `ACT`, and `OT`. Input is case-insensitive and responses normalize state codes to uppercase.",
+                        "name": "state",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 20,
+                            "default": 5,
+                            "description": "Maximum number of suggestions to return.",
+                            "example": 3
+                        },
+                        "required": false,
+                        "description": "Maximum number of suggestions to return.",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "$ref": "#/components/schemas/AddressDebugQuery"
+                        },
+                        "required": false,
+                        "description": "Optional diagnostic flag. Send exactly `true` or `false`. Invalid values are rejected; debug diagnostics are for support only and must not be used for business decisions.",
+                        "name": "debug",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Address suggestions returned for the partial query. The array may be empty when no address matches.",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "Unique request identifier for support and debugging.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-RateLimit-Product": {
+                                "description": "API family whose monthly credit counter was updated, for example `address`.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-RateLimit-Reset": {
+                                "description": "ISO timestamp when the current credit window resets.",
+                                "schema": {
+                                    "type": "string",
+                                    "format": "date-time"
+                                }
+                            },
+                            "X-RateLimit-Limit": {
+                                "description": "Configured included-credit threshold for keys with a monthly quota. Present for hard-cap and soft-overage plans; omitted for PAYG or uncapped plans.",
+                                "schema": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                }
+                            },
+                            "X-RateLimit-Remaining": {
+                                "description": "Included credits remaining in the current window, floored at zero. Present for hard-cap and soft-overage plans; omitted for PAYG or uncapped plans.",
+                                "schema": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                }
+                            },
+                            "X-RateLimit-Over": {
+                                "description": "`true` when the request succeeded as soft-overage after included credits were exceeded.",
+                                "schema": {
+                                    "type": "string",
+                                    "enum": [
+                                        "true"
+                                    ]
+                                }
+                            },
+                            "X-Payment-Overdue": {
+                                "description": "Indicates whether the account currently has an overdue billing state. Request handling still follows the active plan enforcement policy.",
+                                "schema": {
+                                    "type": "string",
+                                    "enum": [
+                                        "true"
+                                    ]
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AutocompleteAddressResponse"
+                                },
+                                "example": {
+                                    "suggestions": [
+                                        {
+                                            "id": "GAQLD156786950",
+                                            "addressLabel": "9 ENDEAVOUR COURT",
+                                            "localityName": "LAMMERMOOR",
+                                            "state": "QLD",
+                                            "postcode": "4703",
+                                            "prontiqMatchScore": 92,
+                                            "prontiqMatchQuality": "high"
+                                        }
+                                    ],
+                                    "total": 1
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The request query string is missing a required parameter or contains a value outside the documented format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "INVALID_PARAMETERS",
+                                        "message": "Invalid query parameters",
+                                        "status": 400,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z",
+                                        "details": {
+                                            "q": [
+                                                "Required"
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "The request did not include a valid `X-Api-Key` header.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "MISSING_API_KEY",
+                                        "message": "Missing X-Api-Key header",
+                                        "status": 401,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "The API key is valid, but the account plan does not include the Address API product.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "PRODUCT_NOT_ALLOWED",
+                                        "message": "Product not included in your plan",
+                                        "status": 403,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "The request exceeded burst rate limits or the account's available Address API quota.",
+                        "headers": {
+                            "Retry-After": {
+                                "description": "Seconds to wait before retrying when error.code is RATE_LIMITED. Quota exhaustion responses may omit this header.",
+                                "schema": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "RATE_LIMITED",
+                                        "message": "Rate limit exceeded",
+                                        "status": 429,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "The API could not complete the request because of an unexpected server-side failure.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "INTERNAL_ERROR",
+                                        "message": "Internal server error",
+                                        "status": 500,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/address/validate": {
+            "get": {
+                "operationId": "validateAddress",
+                "tags": [
+                    "Address"
+                ],
+                "summary": "Validate an address",
+                "description": "Find the best G-NAF match for a submitted address string and classify request match quality. Use `prontiqMatchScore` and `prontiqMatchQuality` for acceptance thresholds and user prompts. If `match` is present, `match.confidence` is separate G-NAF source-record metadata for the address record.",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 500,
+                            "description": "Free-text address to validate against G-NAF. Include suburb, state, and postcode when available for the strongest match signal.",
+                            "example": "9 endeavour court lammermoor qld 4703"
+                        },
+                        "required": true,
+                        "description": "Free-text address to validate against G-NAF. Include suburb, state, and postcode when available for the strongest match signal.",
+                        "name": "q",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "$ref": "#/components/schemas/AddressDebugQuery"
+                        },
+                        "required": false,
+                        "description": "Optional diagnostic flag. Send exactly `true` or `false`. Invalid values are rejected; debug diagnostics are for support only and must not be used for business decisions.",
+                        "name": "debug",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Best address match, or `match: null` when the input does not resolve cleanly.",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "Unique request identifier for support and debugging.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-RateLimit-Product": {
+                                "description": "API family whose monthly credit counter was updated, for example `address`.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-RateLimit-Reset": {
+                                "description": "ISO timestamp when the current credit window resets.",
+                                "schema": {
+                                    "type": "string",
+                                    "format": "date-time"
+                                }
+                            },
+                            "X-RateLimit-Limit": {
+                                "description": "Configured included-credit threshold for keys with a monthly quota. Present for hard-cap and soft-overage plans; omitted for PAYG or uncapped plans.",
+                                "schema": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                }
+                            },
+                            "X-RateLimit-Remaining": {
+                                "description": "Included credits remaining in the current window, floored at zero. Present for hard-cap and soft-overage plans; omitted for PAYG or uncapped plans.",
+                                "schema": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                }
+                            },
+                            "X-RateLimit-Over": {
+                                "description": "`true` when the request succeeded as soft-overage after included credits were exceeded.",
+                                "schema": {
+                                    "type": "string",
+                                    "enum": [
+                                        "true"
+                                    ]
+                                }
+                            },
+                            "X-Payment-Overdue": {
+                                "description": "Indicates whether the account currently has an overdue billing state. Request handling still follows the active plan enforcement policy.",
+                                "schema": {
+                                    "type": "string",
+                                    "enum": [
+                                        "true"
+                                    ]
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidateAddressResponse"
+                                },
+                                "example": {
+                                    "match": {
+                                        "id": "GAQLD156786950",
+                                        "addressLabel": "9 ENDEAVOUR COURT",
+                                        "localityName": "LAMMERMOOR",
+                                        "state": "QLD",
+                                        "postcode": "4703",
+                                        "confidence": 2,
+                                        "fallbackGeocode": null,
+                                        "geocode": {
+                                            "latitude": -23.1601,
+                                            "longitude": 150.7596,
+                                            "type": "PROPERTY CENTROID",
+                                            "reliability": 2
+                                        },
+                                        "location": {
+                                            "lat": -23.1601,
+                                            "lon": 150.7596
+                                        },
+                                        "boundaries": {
+                                            "lga": {
+                                                "name": "Livingstone Shire"
+                                            },
+                                            "stateElectorate": {
+                                                "name": "Keppel"
+                                            },
+                                            "commonwealthElectorate": {
+                                                "name": "Capricornia"
+                                            },
+                                            "meshBlock": {
+                                                "code": "30000000000",
+                                                "category": "Residential"
+                                            },
+                                            "sa2": {
+                                                "name": "Yeppoon",
+                                                "code": "308011188"
+                                            },
+                                            "sa3": {
+                                                "name": "Rockhampton",
+                                                "code": "30801"
+                                            },
+                                            "sa4": {
+                                                "name": "Central Queensland",
+                                                "code": "308"
+                                            }
+                                        }
+                                    },
+                                    "prontiqMatchScore": 92,
+                                    "prontiqMatchQuality": "high"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The request query string is missing a required parameter or contains a value outside the documented format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "INVALID_PARAMETERS",
+                                        "message": "Invalid query parameters",
+                                        "status": 400,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z",
+                                        "details": {
+                                            "q": [
+                                                "Required"
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "The request did not include a valid `X-Api-Key` header.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "MISSING_API_KEY",
+                                        "message": "Missing X-Api-Key header",
+                                        "status": 401,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "The API key is valid, but the account plan does not include the Address API product.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "PRODUCT_NOT_ALLOWED",
+                                        "message": "Product not included in your plan",
+                                        "status": 403,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "The request exceeded burst rate limits or the account's available Address API quota.",
+                        "headers": {
+                            "Retry-After": {
+                                "description": "Seconds to wait before retrying when error.code is RATE_LIMITED. Quota exhaustion responses may omit this header.",
+                                "schema": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "RATE_LIMITED",
+                                        "message": "Rate limit exceeded",
+                                        "status": 429,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "The API could not complete the request because of an unexpected server-side failure.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "INTERNAL_ERROR",
+                                        "message": "Internal server error",
+                                        "status": 500,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/address/enrich": {
+            "get": {
+                "operationId": "enrichAddress",
+                "tags": [
+                    "Address"
+                ],
+                "summary": "Enrich an address by ID",
+                "description": "Return the richest public address document for a known G-NAF address `id` returned by Autocomplete, Validate, or Reverse geocode. Use this after a user selects an address when you need structured components, geocodes, boundaries, locality and street context, aliases, secondaries, and source-record metadata.",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "minLength": 1,
+                            "description": "G-NAF address document ID. Paste an id value returned from Autocomplete or Validate.",
+                            "example": "GAQLD156786950"
+                        },
+                        "required": true,
+                        "description": "G-NAF address document ID. Paste an id value returned from Autocomplete or Validate.",
+                        "name": "id",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "$ref": "#/components/schemas/AddressDebugQuery"
+                        },
+                        "required": false,
+                        "description": "Optional diagnostic flag. Send exactly `true` or `false`. Invalid values are rejected; debug diagnostics are for support only and must not be used for business decisions.",
+                        "name": "debug",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Full enriched public address document for the requested `id`.",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "Unique request identifier for support and debugging.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-RateLimit-Product": {
+                                "description": "API family whose monthly credit counter was updated, for example `address`.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-RateLimit-Reset": {
+                                "description": "ISO timestamp when the current credit window resets.",
+                                "schema": {
+                                    "type": "string",
+                                    "format": "date-time"
+                                }
+                            },
+                            "X-RateLimit-Limit": {
+                                "description": "Configured included-credit threshold for keys with a monthly quota. Present for hard-cap and soft-overage plans; omitted for PAYG or uncapped plans.",
+                                "schema": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                }
+                            },
+                            "X-RateLimit-Remaining": {
+                                "description": "Included credits remaining in the current window, floored at zero. Present for hard-cap and soft-overage plans; omitted for PAYG or uncapped plans.",
+                                "schema": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                }
+                            },
+                            "X-RateLimit-Over": {
+                                "description": "`true` when the request succeeded as soft-overage after included credits were exceeded.",
+                                "schema": {
+                                    "type": "string",
+                                    "enum": [
+                                        "true"
+                                    ]
+                                }
+                            },
+                            "X-Payment-Overdue": {
+                                "description": "Indicates whether the account currently has an overdue billing state. Request handling still follows the active plan enforcement policy.",
+                                "schema": {
+                                    "type": "string",
+                                    "enum": [
+                                        "true"
+                                    ]
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EnrichAddressResponse"
+                                },
+                                "example": {
+                                    "id": "GAQLD156786950",
+                                    "addressLabel": "9 ENDEAVOUR COURT",
+                                    "localityName": "LAMMERMOOR",
+                                    "state": "QLD",
+                                    "postcode": "4703",
+                                    "confidence": 2,
+                                    "fallbackGeocode": null,
+                                    "geocode": {
+                                        "latitude": -23.1601,
+                                        "longitude": 150.7596,
+                                        "type": "PROPERTY CENTROID",
+                                        "reliability": 2
+                                    },
+                                    "location": {
+                                        "lat": -23.1601,
+                                        "lon": 150.7596
+                                    },
+                                    "boundaries": {
+                                        "lga": {
+                                            "name": "Glen Eira",
+                                            "code": "lga9bd137c30d17"
+                                        },
+                                        "stateElectorate": {
+                                            "name": "Keppel"
+                                        },
+                                        "commonwealthElectorate": {
+                                            "name": "Capricornia"
+                                        },
+                                        "meshBlock": {
+                                            "code": "30000000000",
+                                            "category": "Residential"
+                                        },
+                                        "sa2": {
+                                            "name": "Yeppoon",
+                                            "code": "308011188"
+                                        },
+                                        "sa3": {
+                                            "name": "Rockhampton",
+                                            "code": "30801"
+                                        },
+                                        "sa4": {
+                                            "name": "Central Queensland",
+                                            "code": "308"
+                                        },
+                                        "ward": {
+                                            "name": "Bambra Ward"
+                                        },
+                                        "sa1": "20802117831"
+                                    },
+                                    "sourceDataRelease": "2026.08",
+                                    "addressRole": "SECONDARY",
+                                    "legalParcelId": "14\\PS349838",
+                                    "components": {
+                                        "flatType": "FLAT",
+                                        "flatNumber": "14",
+                                        "streetNumberFirst": "5",
+                                        "streetName": "DUKE",
+                                        "streetType": "STREET"
+                                    },
+                                    "allGeocodes": [
+                                        {
+                                            "latitude": -37.89180933,
+                                            "longitude": 145.01510717,
+                                            "type": "FRONTAGE CENTRE SETBACK",
+                                            "reliability": 2
+                                        },
+                                        {
+                                            "latitude": -37.89180905,
+                                            "longitude": 145.01490263,
+                                            "type": "PROPERTY CENTROID",
+                                            "reliability": 2
+                                        }
+                                    ],
+                                    "locality": {
+                                        "id": "loc1b5a0e70afd4",
+                                        "classification": "GAZETTED LOCALITY",
+                                        "neighbours": [
+                                            "ELSTERNWICK",
+                                            "GARDENVALE",
+                                            "ORMOND"
+                                        ],
+                                        "aliases": []
+                                    },
+                                    "street": {
+                                        "id": "VIC1953679",
+                                        "classification": "CONFIRMED",
+                                        "aliases": []
+                                    },
+                                    "aliases": [
+                                        {
+                                            "id": "MA13517230",
+                                            "addressLabel": "SHOP 1 GROUND 1 MCNAB AVENUE",
+                                            "type": "SYNONYM"
+                                        }
+                                    ],
+                                    "secondaries": [
+                                        {
+                                            "id": "GAVIC425495838",
+                                            "addressLabel": "SHOP 1 1 MCNAB AVENUE"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The request query string is missing a required parameter or contains a value outside the documented format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "INVALID_PARAMETERS",
+                                        "message": "Invalid query parameters",
+                                        "status": 400,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z",
+                                        "details": {
+                                            "q": [
+                                                "Required"
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "The request did not include a valid `X-Api-Key` header.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "MISSING_API_KEY",
+                                        "message": "Missing X-Api-Key header",
+                                        "status": 401,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "The API key is valid, but the account plan does not include the Address API product.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "PRODUCT_NOT_ALLOWED",
+                                        "message": "Product not included in your plan",
+                                        "status": 403,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "The supplied `id` does not resolve to a current address document.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "NOT_FOUND",
+                                        "message": "Address not found: F_GAVIC999000002",
+                                        "status": 404,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "The request exceeded burst rate limits or the account's available Address API quota.",
+                        "headers": {
+                            "Retry-After": {
+                                "description": "Seconds to wait before retrying when error.code is RATE_LIMITED. Quota exhaustion responses may omit this header.",
+                                "schema": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "RATE_LIMITED",
+                                        "message": "Rate limit exceeded",
+                                        "status": 429,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "The API could not complete the request because of an unexpected server-side failure.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "INTERNAL_ERROR",
+                                        "message": "Internal server error",
+                                        "status": 500,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/address/reverse": {
+            "get": {
+                "operationId": "reverseGeocodeAddress",
+                "tags": [
+                    "Address"
+                ],
+                "summary": "Reverse geocode nearby addresses",
+                "description": "Find addresses near a latitude and longitude. Use this when a workflow starts from a map pin, device coordinate, or spatial search. Results are ordered by distance and include `distance_m` in metres.",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "number",
+                            "minimum": -90,
+                            "maximum": 90,
+                            "description": "Latitude in GDA2020 (EPSG:7844) decimal degrees for the reverse-geocode search point.",
+                            "example": -23.1601
+                        },
+                        "required": true,
+                        "description": "Latitude in GDA2020 (EPSG:7844) decimal degrees for the reverse-geocode search point.",
+                        "name": "lat",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "type": "number",
+                            "minimum": -180,
+                            "maximum": 180,
+                            "description": "Longitude in GDA2020 (EPSG:7844) decimal degrees for the reverse-geocode search point.",
+                            "example": 150.7596
+                        },
+                        "required": true,
+                        "description": "Longitude in GDA2020 (EPSG:7844) decimal degrees for the reverse-geocode search point.",
+                        "name": "lon",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "type": "number",
+                            "minimum": 1,
+                            "maximum": 50000,
+                            "default": 100,
+                            "description": "Search radius in metres.",
+                            "example": 200
+                        },
+                        "required": false,
+                        "description": "Search radius in metres.",
+                        "name": "radius",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 20,
+                            "default": 5,
+                            "description": "Maximum number of nearby addresses to return.",
+                            "example": 3
+                        },
+                        "required": false,
+                        "description": "Maximum number of nearby addresses to return.",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "$ref": "#/components/schemas/AddressDebugQuery"
+                        },
+                        "required": false,
+                        "description": "Optional diagnostic flag. Send exactly `true` or `false`. Invalid values are rejected; debug diagnostics are for support only and must not be used for business decisions.",
+                        "name": "debug",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Nearby addresses sorted by distance from the submitted coordinate.",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "Unique request identifier for support and debugging.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-RateLimit-Product": {
+                                "description": "API family whose monthly credit counter was updated, for example `address`.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-RateLimit-Reset": {
+                                "description": "ISO timestamp when the current credit window resets.",
+                                "schema": {
+                                    "type": "string",
+                                    "format": "date-time"
+                                }
+                            },
+                            "X-RateLimit-Limit": {
+                                "description": "Configured included-credit threshold for keys with a monthly quota. Present for hard-cap and soft-overage plans; omitted for PAYG or uncapped plans.",
+                                "schema": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                }
+                            },
+                            "X-RateLimit-Remaining": {
+                                "description": "Included credits remaining in the current window, floored at zero. Present for hard-cap and soft-overage plans; omitted for PAYG or uncapped plans.",
+                                "schema": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                }
+                            },
+                            "X-RateLimit-Over": {
+                                "description": "`true` when the request succeeded as soft-overage after included credits were exceeded.",
+                                "schema": {
+                                    "type": "string",
+                                    "enum": [
+                                        "true"
+                                    ]
+                                }
+                            },
+                            "X-Payment-Overdue": {
+                                "description": "Indicates whether the account currently has an overdue billing state. Request handling still follows the active plan enforcement policy.",
+                                "schema": {
+                                    "type": "string",
+                                    "enum": [
+                                        "true"
+                                    ]
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReverseGeocodeAddressResponse"
+                                },
+                                "example": {
+                                    "results": [
+                                        {
+                                            "id": "GAQLD156786950",
+                                            "addressLabel": "9 ENDEAVOUR COURT",
+                                            "localityName": "LAMMERMOOR",
+                                            "state": "QLD",
+                                            "postcode": "4703",
+                                            "confidence": 2,
+                                            "fallbackGeocode": null,
+                                            "geocode": {
+                                                "latitude": -23.1601,
+                                                "longitude": 150.7596,
+                                                "type": "PROPERTY CENTROID",
+                                                "reliability": 2
+                                            },
+                                            "location": {
+                                                "lat": -23.1601,
+                                                "lon": 150.7596
+                                            },
+                                            "boundaries": {
+                                                "lga": {
+                                                    "name": "Livingstone Shire"
+                                                },
+                                                "stateElectorate": {
+                                                    "name": "Keppel"
+                                                },
+                                                "commonwealthElectorate": {
+                                                    "name": "Capricornia"
+                                                },
+                                                "meshBlock": {
+                                                    "code": "30000000000",
+                                                    "category": "Residential"
+                                                },
+                                                "sa2": {
+                                                    "name": "Yeppoon",
+                                                    "code": "308011188"
+                                                },
+                                                "sa3": {
+                                                    "name": "Rockhampton",
+                                                    "code": "30801"
+                                                },
+                                                "sa4": {
+                                                    "name": "Central Queensland",
+                                                    "code": "308"
+                                                }
+                                            },
+                                            "distance_m": 0
+                                        }
+                                    ],
+                                    "total": 1
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The request query string is missing a required parameter or contains a value outside the documented format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "INVALID_PARAMETERS",
+                                        "message": "Invalid query parameters",
+                                        "status": 400,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z",
+                                        "details": {
+                                            "q": [
+                                                "Required"
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "The request did not include a valid `X-Api-Key` header.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "MISSING_API_KEY",
+                                        "message": "Missing X-Api-Key header",
+                                        "status": 401,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "The API key is valid, but the account plan does not include the Address API product.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "PRODUCT_NOT_ALLOWED",
+                                        "message": "Product not included in your plan",
+                                        "status": 403,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "The request exceeded burst rate limits or the account's available Address API quota.",
+                        "headers": {
+                            "Retry-After": {
+                                "description": "Seconds to wait before retrying when error.code is RATE_LIMITED. Quota exhaustion responses may omit this header.",
+                                "schema": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "RATE_LIMITED",
+                                        "message": "Rate limit exceeded",
+                                        "status": 429,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "The API could not complete the request because of an unexpected server-side failure.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "INTERNAL_ERROR",
+                                        "message": "Internal server error",
+                                        "status": 500,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/address/lookup/postcode": {
+            "get": {
+                "operationId": "lookupPostcode",
+                "tags": [
+                    "Address"
+                ],
+                "summary": "Look up localities by postcode",
+                "description": "List suburbs or localities that have address records in a four-digit Australian postcode. Use this for postcode-first forms, locality dropdowns, and coverage checks. `address_count` is dataset cardinality, not billing usage.",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^\\d{4}$",
+                            "description": "Australian 4-digit postcode.",
+                            "example": "2000"
+                        },
+                        "required": true,
+                        "description": "Australian 4-digit postcode.",
+                        "name": "postcode",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 50,
+                            "default": 10,
+                            "description": "Maximum number of localities to return.",
+                            "example": 3
+                        },
+                        "required": false,
+                        "description": "Maximum number of localities to return.",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "$ref": "#/components/schemas/AddressDebugQuery"
+                        },
+                        "required": false,
+                        "description": "Optional diagnostic flag. Send exactly `true` or `false`. Invalid values are rejected; debug diagnostics are for support only and must not be used for business decisions.",
+                        "name": "debug",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Localities and address counts for the requested postcode.",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "Unique request identifier for support and debugging.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-RateLimit-Product": {
+                                "description": "API family whose monthly credit counter was updated, for example `address`.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-RateLimit-Reset": {
+                                "description": "ISO timestamp when the current credit window resets.",
+                                "schema": {
+                                    "type": "string",
+                                    "format": "date-time"
+                                }
+                            },
+                            "X-RateLimit-Limit": {
+                                "description": "Configured included-credit threshold for keys with a monthly quota. Present for hard-cap and soft-overage plans; omitted for PAYG or uncapped plans.",
+                                "schema": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                }
+                            },
+                            "X-RateLimit-Remaining": {
+                                "description": "Included credits remaining in the current window, floored at zero. Present for hard-cap and soft-overage plans; omitted for PAYG or uncapped plans.",
+                                "schema": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                }
+                            },
+                            "X-RateLimit-Over": {
+                                "description": "`true` when the request succeeded as soft-overage after included credits were exceeded.",
+                                "schema": {
+                                    "type": "string",
+                                    "enum": [
+                                        "true"
+                                    ]
+                                }
+                            },
+                            "X-Payment-Overdue": {
+                                "description": "Indicates whether the account currently has an overdue billing state. Request handling still follows the active plan enforcement policy.",
+                                "schema": {
+                                    "type": "string",
+                                    "enum": [
+                                        "true"
+                                    ]
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PostcodeLookupResponse"
+                                },
+                                "example": {
+                                    "postcode": "2000",
+                                    "localities": [
+                                        {
+                                            "name": "SYDNEY",
+                                            "state": "NSW",
+                                            "address_count": 12345
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The request query string is missing a required parameter or contains a value outside the documented format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "INVALID_PARAMETERS",
+                                        "message": "Invalid query parameters",
+                                        "status": 400,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z",
+                                        "details": {
+                                            "q": [
+                                                "Required"
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "The request did not include a valid `X-Api-Key` header.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "MISSING_API_KEY",
+                                        "message": "Missing X-Api-Key header",
+                                        "status": 401,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "The API key is valid, but the account plan does not include the Address API product.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "PRODUCT_NOT_ALLOWED",
+                                        "message": "Product not included in your plan",
+                                        "status": 403,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "The request exceeded burst rate limits or the account's available Address API quota.",
+                        "headers": {
+                            "Retry-After": {
+                                "description": "Seconds to wait before retrying when error.code is RATE_LIMITED. Quota exhaustion responses may omit this header.",
+                                "schema": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "RATE_LIMITED",
+                                        "message": "Rate limit exceeded",
+                                        "status": 429,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "The API could not complete the request because of an unexpected server-side failure.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "INTERNAL_ERROR",
+                                        "message": "Internal server error",
+                                        "status": 500,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/address/lookup/suburb": {
+            "get": {
+                "operationId": "lookupSuburb",
+                "tags": [
+                    "Address"
+                ],
+                "summary": "Look up postcodes by suburb",
+                "description": "Find postcodes for an Australian suburb or locality. Add `state` to disambiguate common locality names that exist in multiple states. Responses may include an approximate bounding box and total address count.",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "description": "Suburb/locality name.",
+                            "example": "sydney"
+                        },
+                        "required": true,
+                        "description": "Suburb/locality name.",
+                        "name": "suburb",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/components/schemas/AustralianStateCodeQuery"
+                                },
+                                {
+                                    "example": "NSW"
+                                }
+                            ]
+                        },
+                        "required": false,
+                        "description": "Australian state or territory filter. Allowed values are `NSW`, `VIC`, `QLD`, `SA`, `WA`, `TAS`, `NT`, `ACT`, and `OT`. Input is case-insensitive and responses normalize state codes to uppercase.",
+                        "name": "state",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 20,
+                            "default": 10,
+                            "description": "Maximum number of postcodes to return.",
+                            "example": 3
+                        },
+                        "required": false,
+                        "description": "Maximum number of postcodes to return.",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "schema": {
+                            "$ref": "#/components/schemas/AddressDebugQuery"
+                        },
+                        "required": false,
+                        "description": "Optional diagnostic flag. Send exactly `true` or `false`. Invalid values are rejected; debug diagnostics are for support only and must not be used for business decisions.",
+                        "name": "debug",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Postcodes, optional bounds, and address count for the requested suburb or locality.",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "Unique request identifier for support and debugging.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-RateLimit-Product": {
+                                "description": "API family whose monthly credit counter was updated, for example `address`.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-RateLimit-Reset": {
+                                "description": "ISO timestamp when the current credit window resets.",
+                                "schema": {
+                                    "type": "string",
+                                    "format": "date-time"
+                                }
+                            },
+                            "X-RateLimit-Limit": {
+                                "description": "Configured included-credit threshold for keys with a monthly quota. Present for hard-cap and soft-overage plans; omitted for PAYG or uncapped plans.",
+                                "schema": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                }
+                            },
+                            "X-RateLimit-Remaining": {
+                                "description": "Included credits remaining in the current window, floored at zero. Present for hard-cap and soft-overage plans; omitted for PAYG or uncapped plans.",
+                                "schema": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                }
+                            },
+                            "X-RateLimit-Over": {
+                                "description": "`true` when the request succeeded as soft-overage after included credits were exceeded.",
+                                "schema": {
+                                    "type": "string",
+                                    "enum": [
+                                        "true"
+                                    ]
+                                }
+                            },
+                            "X-Payment-Overdue": {
+                                "description": "Indicates whether the account currently has an overdue billing state. Request handling still follows the active plan enforcement policy.",
+                                "schema": {
+                                    "type": "string",
+                                    "enum": [
+                                        "true"
+                                    ]
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuburbLookupResponse"
+                                },
+                                "example": {
+                                    "suburb": "SYDNEY",
+                                    "state": "NSW",
+                                    "postcodes": [
+                                        "2000"
+                                    ],
+                                    "bounds": {
+                                        "top_left": {
+                                            "lat": -33.8568,
+                                            "lon": 151.2001
+                                        },
+                                        "bottom_right": {
+                                            "lat": -33.8812,
+                                            "lon": 151.2204
+                                        }
+                                    },
+                                    "address_count": 12345
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The request query string is missing a required parameter or contains a value outside the documented format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "INVALID_PARAMETERS",
+                                        "message": "Invalid query parameters",
+                                        "status": 400,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z",
+                                        "details": {
+                                            "q": [
+                                                "Required"
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "The request did not include a valid `X-Api-Key` header.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "MISSING_API_KEY",
+                                        "message": "Missing X-Api-Key header",
+                                        "status": 401,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "The API key is valid, but the account plan does not include the Address API product.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "PRODUCT_NOT_ALLOWED",
+                                        "message": "Product not included in your plan",
+                                        "status": 403,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "The request exceeded burst rate limits or the account's available Address API quota.",
+                        "headers": {
+                            "Retry-After": {
+                                "description": "Seconds to wait before retrying when error.code is RATE_LIMITED. Quota exhaustion responses may omit this header.",
+                                "schema": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "RATE_LIMITED",
+                                        "message": "Rate limit exceeded",
+                                        "status": 429,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "The API could not complete the request because of an unexpected server-side failure.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
+                                },
+                                "example": {
+                                    "error": {
+                                        "code": "INTERNAL_ERROR",
+                                        "message": "Internal server error",
+                                        "status": 500,
+                                        "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "webhooks": {}
+}

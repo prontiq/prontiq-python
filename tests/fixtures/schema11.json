@@ -1,0 +1,414 @@
+[
+  {
+    "address": {
+      "id": "GAOT_717319660",
+      "addressLabel": "2 ABBOTTS NEST",
+      "localityName": "CHRISTMAS ISLAND",
+      "state": "OT",
+      "postcode": "6798",
+      "confidence": 2,
+      "geocode": {
+        "latitude": -10.43384769,
+        "longitude": 105.6707055,
+        "type": "PROPERTY CENTROID",
+        "reliability": 2
+      },
+      "fallbackGeocode": null,
+      "location": {
+        "lat": -10.43384769,
+        "lon": 105.6707055
+      },
+      "boundaries": {
+        "lga": {
+          "name": "Shire of Christmas Island",
+          "code": "lga68fdd0066f94"
+        },
+        "stateElectorate": null,
+        "commonwealthElectorate": {
+          "name": "LINGIARI"
+        },
+        "meshBlock": {
+          "code": "90000102000",
+          "category": "Residential"
+        },
+        "sa2": {
+          "name": "Christmas Island",
+          "code": "901011001"
+        },
+        "sa3": {
+          "name": "Christmas Island",
+          "code": "90101"
+        },
+        "sa4": {
+          "name": "Other Territories",
+          "code": "901"
+        },
+        "gccsa": {
+          "name": "Other Territories",
+          "code": "9OTER"
+        }
+      }
+    },
+    "enrich": {
+      "id": "GAOT_717319660",
+      "addressLabel": "2 ABBOTTS NEST",
+      "localityName": "CHRISTMAS ISLAND",
+      "state": "OT",
+      "postcode": "6798",
+      "confidence": 2,
+      "geocode": {
+        "latitude": -10.43384769,
+        "longitude": 105.6707055,
+        "type": "PROPERTY CENTROID",
+        "reliability": 2
+      },
+      "fallbackGeocode": null,
+      "location": {
+        "lat": -10.43384769,
+        "lon": 105.6707055
+      },
+      "boundaries": {
+        "lga": {
+          "name": "Shire of Christmas Island",
+          "code": "lga68fdd0066f94"
+        },
+        "stateElectorate": null,
+        "commonwealthElectorate": {
+          "name": "LINGIARI"
+        },
+        "meshBlock": {
+          "code": "90000102000",
+          "category": "Residential"
+        },
+        "sa2": {
+          "name": "Christmas Island",
+          "code": "901011001"
+        },
+        "sa3": {
+          "name": "Christmas Island",
+          "code": "90101"
+        },
+        "sa4": {
+          "name": "Other Territories",
+          "code": "901"
+        },
+        "gccsa": {
+          "name": "Other Territories",
+          "code": "9OTER"
+        },
+        "sa1": "90101100103",
+        "ward": null
+      },
+      "sourceDataRelease": "2026.08",
+      "addressRole": null,
+      "components": {
+        "addressSiteName": null,
+        "buildingName": null,
+        "flatType": null,
+        "flatNumber": null,
+        "levelType": null,
+        "levelNumber": null,
+        "lotNumber": null,
+        "streetNumberFirst": "2",
+        "streetNumberLast": null,
+        "streetName": "ABBOTTS NEST",
+        "streetType": null,
+        "streetSuffix": null
+      },
+      "legalParcelId": "P191764/366",
+      "allGeocodes": [
+        {
+          "latitude": -10.43384769,
+          "longitude": 105.6707055,
+          "type": "PROPERTY CENTROID",
+          "reliability": 2
+        }
+      ],
+      "locality": {
+        "id": "loc9984d8beb142",
+        "classification": "UNOFFICIAL SUBURB",
+        "neighbours": [],
+        "aliases": [
+          "DRUMSITE",
+          "KAMPONG",
+          "PHOSPHATE HILL",
+          "POON SAAN",
+          "SETTLEMENT",
+          "SILVER CITY"
+        ]
+      },
+      "street": {
+        "id": "OT677702",
+        "classification": "CONFIRMED",
+        "aliases": [
+          "ABBOTTS NEST ROAD"
+        ]
+      },
+      "aliases": [],
+      "secondaries": []
+    }
+  },
+  {
+    "address": {
+      "id": "GAOT_717320025",
+      "addressLabel": "70 ADAMS CLOSE",
+      "localityName": "JERVIS BAY",
+      "state": "OT",
+      "postcode": "2540",
+      "confidence": 1,
+      "geocode": null,
+      "fallbackGeocode": {
+        "latitude": -35.14907948,
+        "longitude": 150.69612068,
+        "typeCode": "LOC",
+        "type": "LOCALITY",
+        "source": "GNAF_DEFAULT",
+        "precision": "locality"
+      },
+      "location": null,
+      "boundaries": {
+        "lga": null,
+        "stateElectorate": null,
+        "commonwealthElectorate": {
+          "name": "FENNER"
+        },
+        "meshBlock": {
+          "code": "90000030000",
+          "category": "Commercial"
+        },
+        "sa2": {
+          "name": "Jervis Bay",
+          "code": "901031003"
+        },
+        "sa3": {
+          "name": "Jervis Bay",
+          "code": "90103"
+        },
+        "sa4": {
+          "name": "Other Territories",
+          "code": "901"
+        },
+        "gccsa": {
+          "name": "Other Territories",
+          "code": "9OTER"
+        }
+      }
+    },
+    "enrich": {
+      "id": "GAOT_717320025",
+      "addressLabel": "70 ADAMS CLOSE",
+      "localityName": "JERVIS BAY",
+      "state": "OT",
+      "postcode": "2540",
+      "confidence": 1,
+      "geocode": null,
+      "fallbackGeocode": {
+        "latitude": -35.14907948,
+        "longitude": 150.69612068,
+        "typeCode": "LOC",
+        "type": "LOCALITY",
+        "source": "GNAF_DEFAULT",
+        "precision": "locality"
+      },
+      "location": null,
+      "boundaries": {
+        "lga": null,
+        "stateElectorate": null,
+        "commonwealthElectorate": {
+          "name": "FENNER"
+        },
+        "meshBlock": {
+          "code": "90000030000",
+          "category": "Commercial"
+        },
+        "sa2": {
+          "name": "Jervis Bay",
+          "code": "901031003"
+        },
+        "sa3": {
+          "name": "Jervis Bay",
+          "code": "90103"
+        },
+        "sa4": {
+          "name": "Other Territories",
+          "code": "901"
+        },
+        "gccsa": {
+          "name": "Other Territories",
+          "code": "9OTER"
+        },
+        "sa1": "90103100301",
+        "ward": null
+      },
+      "sourceDataRelease": "2026.08",
+      "addressRole": null,
+      "components": {
+        "addressSiteName": null,
+        "buildingName": null,
+        "flatType": null,
+        "flatNumber": null,
+        "levelType": null,
+        "levelNumber": null,
+        "lotNumber": null,
+        "streetNumberFirst": "70",
+        "streetNumberLast": null,
+        "streetName": "ADAMS",
+        "streetType": "CLOSE",
+        "streetSuffix": null
+      },
+      "legalParcelId": null,
+      "allGeocodes": [],
+      "locality": {
+        "id": "loced195c315de9",
+        "classification": "UNOFFICIAL SUBURB",
+        "neighbours": [],
+        "aliases": [
+          "WRECK BAY"
+        ]
+      },
+      "street": {
+        "id": "OT677769",
+        "classification": "UNCONFIRMED",
+        "aliases": []
+      },
+      "aliases": [],
+      "secondaries": []
+    }
+  },
+  {
+    "address": {
+      "id": "GAOT_717320033",
+      "addressLabel": "21 AIR FORCE ROAD",
+      "localityName": "WEST ISLAND",
+      "state": "OT",
+      "postcode": "6799",
+      "confidence": 0,
+      "geocode": null,
+      "fallbackGeocode": {
+        "latitude": -12.20477449,
+        "longitude": 96.84370912,
+        "typeCode": "STL",
+        "type": "STREET LOCALITY",
+        "source": "GNAF_DEFAULT",
+        "precision": "street"
+      },
+      "location": null,
+      "boundaries": {
+        "lga": {
+          "name": "Shire of Cocos (Keeling) Islands",
+          "code": "lgaVgu0GvW1EC5u"
+        },
+        "stateElectorate": null,
+        "commonwealthElectorate": {
+          "name": "LINGIARI"
+        },
+        "meshBlock": {
+          "code": "90000570000",
+          "category": "Residential"
+        },
+        "sa2": {
+          "name": "Cocos (Keeling) Islands",
+          "code": "901021002"
+        },
+        "sa3": {
+          "name": "Cocos (Keeling) Islands",
+          "code": "90102"
+        },
+        "sa4": {
+          "name": "Other Territories",
+          "code": "901"
+        },
+        "gccsa": {
+          "name": "Other Territories",
+          "code": "9OTER"
+        }
+      }
+    },
+    "enrich": {
+      "id": "GAOT_717320033",
+      "addressLabel": "21 AIR FORCE ROAD",
+      "localityName": "WEST ISLAND",
+      "state": "OT",
+      "postcode": "6799",
+      "confidence": 0,
+      "geocode": null,
+      "fallbackGeocode": {
+        "latitude": -12.20477449,
+        "longitude": 96.84370912,
+        "typeCode": "STL",
+        "type": "STREET LOCALITY",
+        "source": "GNAF_DEFAULT",
+        "precision": "street"
+      },
+      "location": null,
+      "boundaries": {
+        "lga": {
+          "name": "Shire of Cocos (Keeling) Islands",
+          "code": "lgaVgu0GvW1EC5u"
+        },
+        "stateElectorate": null,
+        "commonwealthElectorate": {
+          "name": "LINGIARI"
+        },
+        "meshBlock": {
+          "code": "90000570000",
+          "category": "Residential"
+        },
+        "sa2": {
+          "name": "Cocos (Keeling) Islands",
+          "code": "901021002"
+        },
+        "sa3": {
+          "name": "Cocos (Keeling) Islands",
+          "code": "90102"
+        },
+        "sa4": {
+          "name": "Other Territories",
+          "code": "901"
+        },
+        "gccsa": {
+          "name": "Other Territories",
+          "code": "9OTER"
+        },
+        "sa1": "90102100202",
+        "ward": null
+      },
+      "sourceDataRelease": "2026.08",
+      "addressRole": null,
+      "components": {
+        "addressSiteName": null,
+        "buildingName": null,
+        "flatType": null,
+        "flatNumber": null,
+        "levelType": null,
+        "levelNumber": null,
+        "lotNumber": null,
+        "streetNumberFirst": "21",
+        "streetNumberLast": null,
+        "streetName": "AIR FORCE",
+        "streetType": "ROAD",
+        "streetSuffix": null
+      },
+      "legalParcelId": null,
+      "allGeocodes": [],
+      "locality": {
+        "id": "loc82a2b1f10de5",
+        "classification": "UNOFFICIAL SUBURB",
+        "neighbours": [
+          "HOME ISLAND"
+        ],
+        "aliases": [
+          "WEST IS COCOS (KEELING)",
+          "WEST ISLAND COCOS (KEELING) IS"
+        ]
+      },
+      "street": {
+        "id": "OT677781",
+        "classification": "CONFIRMED",
+        "aliases": []
+      },
+      "aliases": [],
+      "secondaries": []
+    }
+  }
+]
