@@ -1,0 +1,20 @@
+configVersion: 2.0.0
+generation:
+  sdkClassName: Prontiq
+  maintainOpenAPIOrder: true
+  versioningStrategy: automatic
+  repoUrl: https://github.com/prontiq/prontiq-python
+python:
+  version: 0.3.0
+  packageName: prontiq
+  moduleName: prontiq
+  authors:
+    - Prontiq <support@prontiq.dev>
+  description: The official Python SDK for the Prontiq Address API
+  homepage: https://prontiq.dev
+  documentationUrl: https://docs.prontiq.dev
+  license: Apache-2.0
+  packageManager: uv
+  flattenGlobalSecurity: true
+  responseFormat: flat
+  envVarPrefix: PRONTIQ
