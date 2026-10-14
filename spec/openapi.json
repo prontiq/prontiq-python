@@ -44,7 +44,7 @@
                         "type": "integer",
                         "minimum": 0,
                         "description": "Number of suggestions returned in this response.",
-                        "example": 3
+                        "example": 1
                     },
                     "debug": {
                         "$ref": "#/components/schemas/DebugInfo"
@@ -54,6 +54,20 @@
                     "suggestions",
                     "total"
                 ],
+                "example": {
+                    "suggestions": [
+                        {
+                            "id": "GAQLD156786950",
+                            "addressLabel": "9 ENDEAVOUR COURT",
+                            "localityName": "LAMMERMOOR",
+                            "state": "QLD",
+                            "postcode": "4703",
+                            "prontiqMatchScore": 92,
+                            "prontiqMatchQuality": "high"
+                        }
+                    ],
+                    "total": 1
+                },
                 "description": "Autocomplete suggestions for a partial address query. Suggestions include Prontiq-computed match quality; G-NAF confidence and internal search relevance are not returned in default responses."
             },
             "AddressSuggestion": {

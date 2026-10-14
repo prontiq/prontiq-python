@@ -21,10 +21,14 @@ class AutocompleteAddressResponse:
     """Autocomplete suggestions for a partial address query. Suggestions include Prontiq-computed match quality; G-NAF
     confidence and internal search relevance are not returned in default responses.
 
+        Example:
+            {'suggestions': [{'id': 'GAQLD156786950', 'addressLabel': '9 ENDEAVOUR COURT', 'localityName': 'LAMMERMOOR',
+                'state': 'QLD', 'postcode': '4703', 'prontiqMatchScore': 92, 'prontiqMatchQuality': 'high'}], 'total': 1}
+
         Attributes:
             suggestions (list[AddressSuggestion]): Suggested address records ordered for autocomplete display. The array may
                 be empty when no candidate addresses match the query.
-            total (int): Number of suggestions returned in this response. Example: 3.
+            total (int): Number of suggestions returned in this response. Example: 1.
             debug (DebugInfo | Unset): Optional diagnostic metadata returned only when `debug=true` is supplied. Debug
                 values are for support and troubleshooting, not production decision-making. Example: {'scoringVersion':
                 'address-match-v1', 'queryMode': 'autocomplete', 'searchScore': 42.1}.
