@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.0 (unreleased)
+
+- Replace Stainless with reproducible generation from the public OpenAPI contract.
+  Python 3.11+ and the operation-module interface replace the 0.2 client API;
+  see the README migration guide.
+- Support schema 1.1 fallback coordinates, source-release metadata and Other Territories.
+  Coordinate publication with the production schema 1.1 cutover.
+- Retain installed-package typing, prevent credentials appearing in client
+  representations, and handle nonstandard HTTP statuses in both sync and async calls.
+- Verify the built wheel's runtime and consumer typing in CI and before publication,
+  including stable Python 3.15 coverage in CI.
+
 ## 0.2.1 (2026-05-15)
 
 Full Changelog: [v0.2.0...v0.2.1](https://github.com/prontiq/prontiq-python/compare/v0.2.0...v0.2.1)

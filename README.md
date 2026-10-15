@@ -1,380 +1,94 @@
-# Prontiq Python API library
+# Prontiq Python SDK
 
-<!-- prettier-ignore -->
-[![PyPI version](https://img.shields.io/pypi/v/prontiq.svg?label=pypi%20(stable))](https://pypi.org/project/prontiq/)
+Python 3.11+ client generated from the public Prontiq OpenAPI contract.
 
-The Prontiq Python library provides convenient access to the Prontiq REST API from any Python 3.9+
-application. The library includes type definitions for all request params and response fields,
-and offers both synchronous and asynchronous clients powered by [httpx](https://github.com/encode/httpx).
-
-It is generated with [Stainless](https://www.stainless.com/).
-
-## Documentation
-
-The REST API documentation can be found on [docs.prontiq.dev](https://docs.prontiq.dev). The full API of this library can be found in [api.md](api.md).
-
-## Installation
-
-```sh
-# install from PyPI
-pip install prontiq
+```bash
+pip install 'prontiq>=0.3,<0.4'
 ```
-
-## Usage
-
-The full API of this library can be found in [api.md](api.md).
 
 ```python
 import os
-from prontiq import Prontiq
-
-client = Prontiq(
-    api_key=os.environ.get("PRONTIQ_API_KEY"),  # This is the default and can be omitted
-)
-
-response = client.address.autocomplete(
-    q="200 George Street Sydney",
-)
-print(response.suggestions)
-```
-
-While you can provide an `api_key` keyword argument,
-we recommend using [python-dotenv](https://pypi.org/project/python-dotenv/)
-to add `PRONTIQ_API_KEY="My API Key"` to your `.env` file
-so that your API Key is not stored in source control.
-
-## Async usage
-
-Simply import `AsyncProntiq` instead of `Prontiq` and use `await` with each API call:
-
-```python
-import os
-import asyncio
-from prontiq import AsyncProntiq
-
-client = AsyncProntiq(
-    api_key=os.environ.get("PRONTIQ_API_KEY"),  # This is the default and can be omitted
-)
-
-
-async def main() -> None:
-    response = await client.address.autocomplete(
-        q="200 George Street Sydney",
-    )
-    print(response.suggestions)
-
-
-asyncio.run(main())
-```
-
-Functionality between the synchronous and asynchronous clients is otherwise identical.
-
-### With aiohttp
-
-By default, the async client uses `httpx` for HTTP requests. However, for improved concurrency performance you may also use `aiohttp` as the HTTP backend.
-
-You can enable this by installing `aiohttp`:
-
-```sh
-# install from PyPI
-pip install prontiq[aiohttp]
-```
-
-Then you can enable it by instantiating the client with `http_client=DefaultAioHttpClient()`:
-
-```python
-import os
-import asyncio
-from prontiq import DefaultAioHttpClient
-from prontiq import AsyncProntiq
-
-
-async def main() -> None:
-    async with AsyncProntiq(
-        api_key=os.environ.get("PRONTIQ_API_KEY"),  # This is the default and can be omitted
-        http_client=DefaultAioHttpClient(),
-    ) as client:
-        response = await client.address.autocomplete(
-            q="200 George Street Sydney",
-        )
-        print(response.suggestions)
-
-
-asyncio.run(main())
-```
-
-## Using types
-
-Nested request parameters are [TypedDicts](https://docs.python.org/3/library/typing.html#typing.TypedDict). Responses are [Pydantic models](https://docs.pydantic.dev) which also provide helper methods for things like:
-
-- Serializing back into JSON, `model.to_json()`
-- Converting to a dictionary, `model.to_dict()`
-
-Typed requests and responses provide autocomplete and documentation within your editor. If you would like to see type errors in VS Code to help catch bugs earlier, set `python.analysis.typeCheckingMode` to `basic`.
-
-## Handling errors
-
-When the library is unable to connect to the API (for example, due to network connection problems or a timeout), a subclass of `prontiq.APIConnectionError` is raised.
-
-When the API returns a non-success status code (that is, 4xx or 5xx
-response), a subclass of `prontiq.APIStatusError` is raised, containing `status_code` and `response` properties.
-
-All errors inherit from `prontiq.APIError`.
-
-```python
-import prontiq
-from prontiq import Prontiq
-
-client = Prontiq()
-
-try:
-    client.address.autocomplete(
-        q="200 George Street Sydney",
-    )
-except prontiq.APIConnectionError as e:
-    print("The server could not be reached")
-    print(e.__cause__)  # an underlying Exception, likely raised within httpx.
-except prontiq.RateLimitError as e:
-    print("A 429 status code was received; we should back off a bit.")
-except prontiq.APIStatusError as e:
-    print("Another non-200-range status code was received")
-    print(e.status_code)
-    print(e.response)
-```
-
-Error codes are as follows:
-
-| Status Code | Error Type                 |
-| ----------- | -------------------------- |
-| 400         | `BadRequestError`          |
-| 401         | `AuthenticationError`      |
-| 403         | `PermissionDeniedError`    |
-| 404         | `NotFoundError`            |
-| 422         | `UnprocessableEntityError` |
-| 429         | `RateLimitError`           |
-| >=500       | `InternalServerError`      |
-| N/A         | `APIConnectionError`       |
-
-### Retries
-
-Certain errors are automatically retried 2 times by default, with a short exponential backoff.
-Connection errors (for example, due to a network connectivity problem), 408 Request Timeout, 409 Conflict,
-429 Rate Limit, and >=500 Internal errors are all retried by default.
-
-You can use the `max_retries` option to configure or disable retry settings:
-
-```python
-from prontiq import Prontiq
-
-# Configure the default for all requests:
-client = Prontiq(
-    # default is 2
-    max_retries=0,
-)
-
-# Or, configure per-request:
-client.with_options(max_retries=5).address.autocomplete(
-    q="200 George Street Sydney",
-)
-```
-
-### Timeouts
-
-By default requests time out after 1 minute. You can configure this with a `timeout` option,
-which accepts a float or an [`httpx.Timeout`](https://www.python-httpx.org/advanced/timeouts/#fine-tuning-the-configuration) object:
-
-```python
-from prontiq import Prontiq
-
-# Configure the default for all requests:
-client = Prontiq(
-    # 20 seconds (default is 1 minute)
-    timeout=20.0,
-)
-
-# More granular control:
-client = Prontiq(
-    timeout=httpx.Timeout(60.0, read=5.0, write=10.0, connect=2.0),
-)
-
-# Override per-request:
-client.with_options(timeout=5.0).address.autocomplete(
-    q="200 George Street Sydney",
-)
-```
-
-On timeout, an `APITimeoutError` is thrown.
-
-Note that requests that time out are [retried twice by default](#retries).
-
-## Advanced
-
-### Logging
-
-We use the standard library [`logging`](https://docs.python.org/3/library/logging.html) module.
-
-You can enable logging by setting the environment variable `PRONTIQ_LOG` to `info`.
-
-```shell
-$ export PRONTIQ_LOG=info
-```
-
-Or to `debug` for more verbose logging.
-
-### How to tell whether `None` means `null` or missing
-
-In an API response, a field may be explicitly `null`, or missing entirely; in either case, its value is `None` in this library. You can differentiate the two cases with `.model_fields_set`:
-
-```py
-if response.my_field is None:
-  if 'my_field' not in response.model_fields_set:
-    print('Got json like {}, without a "my_field" key present at all.')
-  else:
-    print('Got json like {"my_field": null}.')
-```
-
-### Accessing raw response data (e.g. headers)
-
-The "raw" Response object can be accessed by prefixing `.with_raw_response.` to any HTTP method call, e.g.,
-
-```py
-from prontiq import Prontiq
-
-client = Prontiq()
-response = client.address.with_raw_response.autocomplete(
-    q="200 George Street Sydney",
-)
-print(response.headers.get('X-My-Header'))
-
-address = response.parse()  # get the object that `address.autocomplete()` would have returned
-print(address.suggestions)
-```
-
-These methods return an [`APIResponse`](https://github.com/prontiq/prontiq-python/tree/main/src/prontiq/_response.py) object.
-
-The async client returns an [`AsyncAPIResponse`](https://github.com/prontiq/prontiq-python/tree/main/src/prontiq/_response.py) with the same structure, the only difference being `await`able methods for reading the response content.
-
-#### `.with_streaming_response`
-
-The above interface eagerly reads the full response body when you make the request, which may not always be what you want.
-
-To stream the response body, use `.with_streaming_response` instead, which requires a context manager and only reads the response body once you call `.read()`, `.text()`, `.json()`, `.iter_bytes()`, `.iter_text()`, `.iter_lines()` or `.parse()`. In the async client, these are async methods.
-
-```python
-with client.address.with_streaming_response.autocomplete(
-    q="200 George Street Sydney",
-) as response:
-    print(response.headers.get("X-My-Header"))
-
-    for line in response.iter_lines():
-        print(line)
-```
-
-The context manager is required so that the response will reliably be closed.
-
-### Making custom/undocumented requests
-
-This library is typed for convenient access to the documented API.
-
-If you need to access undocumented endpoints, params, or response properties, the library can still be used.
-
-#### Undocumented endpoints
-
-To make requests to undocumented endpoints, you can make requests using `client.get`, `client.post`, and other
-http verbs. Options on the client will be respected (such as retries) when making this request.
-
-```py
 import httpx
+from prontiq import AuthenticatedClient
+from prontiq.api.address import autocomplete_address
+from prontiq.models import AddressErrorResponse, AutocompleteAddressResponse
 
-response = client.post(
-    "/foo",
-    cast_to=httpx.Response,
-    body={"my_param": True},
-)
-
-print(response.headers.get("x-foo"))
+with AuthenticatedClient(
+    base_url="https://api.prontiq.dev",
+    token=os.environ["PRONTIQ_API_KEY"],
+    auth_header_name="X-Api-Key",
+    prefix="",
+    raise_on_unexpected_status=True,
+    timeout=httpx.Timeout(10.0),
+) as client:
+    response = autocomplete_address.sync_detailed(client=client, q="200 George Street Sydney")
+    if isinstance(response.parsed, AutocompleteAddressResponse):
+        for suggestion in response.parsed.suggestions:
+            print(suggestion.address_label)
+    elif isinstance(response.parsed, AddressErrorResponse):
+        print(response.parsed.error.code)
 ```
 
-#### Undocumented request params
+Set a finite HTTP timeout as shown above; the generated transport otherwise has
+no timeout. Use `async with` and `await autocomplete_address.asyncio_detailed(...)` for async
+applications. All six operation modules support sync and async calls:
 
-If you want to explicitly send an extra param, you can do so with the `extra_query`, `extra_body`, and `extra_headers` request
-options.
+| Module in `prontiq.api.address` | Required arguments |
+| --- | --- |
+| `autocomplete_address` | `q` |
+| `validate_address` | `q` |
+| `enrich_address` | `id` |
+| `reverse_geocode_address` | `lat`, `lon` |
+| `lookup_postcode` | `postcode` |
+| `lookup_suburb` | `suburb` |
 
-#### Undocumented response properties
+The detailed response retains HTTP status, headers and the parsed success/error
+model. Documented errors return `AddressErrorResponse`; unexpected statuses raise
+`prontiq.errors.UnexpectedStatus` when enabled above. Transport failures raise
+HTTPX exceptions. Retries are caller-owned; use the response's `Retry-After` header
+when retrying rate-limited requests.
+With `raise_on_unexpected_status=False`, unexpected responses retain their numeric
+status, headers and body with `parsed=None`, including nonstandard proxy statuses.
 
-To access undocumented response properties, you can access the extra fields like `response.unknown_prop`. You
-can also get all the extra fields on the Pydantic model as a dict with
-[`response.model_extra`](https://docs.pydantic.dev/latest/api/base_model/#pydantic.BaseModel.model_extra).
+## Migrating from 0.2
 
-### Configuring the HTTP client
+Version 0.3 replaces Stainless with pinned `openapi-python-client` generation.
+It requires Python 3.11+, and changes the client interface:
 
-You can directly override the [httpx client](https://www.python-httpx.org/api/#client) to customize it for your use case, including:
+- Replace `Prontiq` / `AsyncProntiq` and `client.address.*` calls with the client
+  and operation modules shown above. Configure `X-Api-Key` with an empty prefix;
+  the generated client's generic default is Bearer authentication.
+- Replace `APIStatusError` handling with detailed response status/model handling.
+- Full address records now require `fallbackGeocode` object/null. Models expose
+  `fallback_geocode` and `source_data_release`, and support state `OT`.
+- Fallback-only records retain `location=None`; fallback precision and decimal
+  coordinates remain separate from primary locations.
 
-- Support for [proxies](https://www.python-httpx.org/advanced/proxies/)
-- Custom [transports](https://www.python-httpx.org/advanced/transports/)
-- Additional [advanced](https://www.python-httpx.org/advanced/clients/) functionality
+Coordinate publication of 0.3 with the schema 1.1 API rollout. It expects the
+schema 1.1 response contract and is not a drop-in replacement for 0.2.
 
-```python
-import httpx
-from prontiq import Prontiq, DefaultHttpxClient
+## Development
 
-client = Prontiq(
-    # Or use the `PRONTIQ_BASE_URL` env var
-    base_url="http://my.test.server.example.com:8083",
-    http_client=DefaultHttpxClient(
-        proxy="http://my.test.proxy.example.com",
-        transport=httpx.HTTPTransport(local_address="0.0.0.0"),
-    ),
-)
+```bash
+uv sync --frozen
+uv run python scripts/generate.py
+uv run python scripts/generate.py --check
+uv run pytest
+uv run ruff check .
+uv run mypy
+uv build
+uv run python scripts/check_package.py
 ```
 
-You can also customize the client on a per-request basis by using `with_options()`:
+`spec/openapi.json` is copied from the committed **public** platform contract by
+the platform's Generate SDKs workflow, which opens a PR here. Edit routes and
+schemas in `prontiq/prontiq-platform`; do not hand-edit `src/prontiq`.
+Generation fails on warnings, and CI checks that regenerated bytes match the
+committed client. The generator normalizes annotation-only scalar intersections
+without removing validation constraints, restores the installed-package typing
+marker, disables client representations that would expose credentials, and
+preserves HTTP statuses outside Python's standard enum.
+CI also installs the built wheel and checks its runtime and consumer typing.
 
-```python
-client.with_options(http_client=DefaultHttpxClient(...))
-```
-
-### Managing HTTP resources
-
-By default the library closes underlying HTTP connections whenever the client is [garbage collected](https://docs.python.org/3/reference/datamodel.html#object.__del__). You can manually close the client using the `.close()` method if desired, or with a context manager that closes when exiting.
-
-```py
-from prontiq import Prontiq
-
-with Prontiq() as client:
-  # make requests here
-  ...
-
-# HTTP client is now closed
-```
-
-## Versioning
-
-This package generally follows [SemVer](https://semver.org/spec/v2.0.0.html) conventions, though certain backwards-incompatible changes may be released as minor versions:
-
-1. Changes that only affect static types, without breaking runtime behavior.
-2. Changes to library internals which are technically public but not intended or documented for external use. _(Please open a GitHub issue to let us know if you are relying on such internals.)_
-3. Changes that we do not expect to impact the vast majority of users in practice.
-
-We take backwards-compatibility seriously and work hard to ensure you can rely on a smooth upgrade experience.
-
-We are keen for your feedback; please open an [issue](https://www.github.com/prontiq/prontiq-python/issues) with questions, bugs, or suggestions.
-
-### Determining the installed version
-
-If you've upgraded to the latest version but aren't seeing any new features you were expecting then your python environment is likely still using an older version.
-
-You can determine the version that is being used at runtime with:
-
-```py
-import prontiq
-print(prontiq.__version__)
-```
-
-## Requirements
-
-Python 3.9 or higher.
-
-## Contributing
-
-See [the contributing documentation](./CONTRIBUTING.md).
+Release from a reviewed `v<version>` tag matching `pyproject.toml` on `main`; the PyPI
+workflow validates generation and tests before publishing with `PYPI_TOKEN`.
