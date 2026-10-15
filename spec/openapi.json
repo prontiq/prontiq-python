@@ -1805,9 +1805,6 @@
                         },
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AutocompleteAddressResponse"
-                                },
                                 "example": {
                                     "suggestions": [
                                         {
@@ -1821,6 +1818,9 @@
                                         }
                                     ],
                                     "total": 1
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AutocompleteAddressResponse"
                                 }
                             }
                         }
@@ -1829,9 +1829,6 @@
                         "description": "The request query string is missing a required parameter or contains a value outside the documented format.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "INVALID_PARAMETERS",
@@ -1844,6 +1841,9 @@
                                             ]
                                         }
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -1852,9 +1852,6 @@
                         "description": "The request did not include a valid `X-Api-Key` header.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "MISSING_API_KEY",
@@ -1862,6 +1859,9 @@
                                         "status": 401,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -1870,9 +1870,6 @@
                         "description": "The API key is valid, but the account plan does not include the Address API product.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "PRODUCT_NOT_ALLOWED",
@@ -1880,6 +1877,9 @@
                                         "status": 403,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -1897,9 +1897,6 @@
                         },
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "RATE_LIMITED",
@@ -1907,6 +1904,9 @@
                                         "status": 429,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -1915,9 +1915,6 @@
                         "description": "The API could not complete the request because of an unexpected server-side failure.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "INTERNAL_ERROR",
@@ -1925,6 +1922,9 @@
                                         "status": 500,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -2027,9 +2027,6 @@
                         },
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ValidateAddressResponse"
-                                },
                                 "example": {
                                     "match": {
                                         "id": "GAQLD156786950",
@@ -2079,6 +2076,9 @@
                                     },
                                     "prontiqMatchScore": 92,
                                     "prontiqMatchQuality": "high"
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidateAddressResponse"
                                 }
                             }
                         }
@@ -2087,9 +2087,6 @@
                         "description": "The request query string is missing a required parameter or contains a value outside the documented format.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "INVALID_PARAMETERS",
@@ -2102,6 +2099,9 @@
                                             ]
                                         }
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -2110,9 +2110,6 @@
                         "description": "The request did not include a valid `X-Api-Key` header.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "MISSING_API_KEY",
@@ -2120,6 +2117,9 @@
                                         "status": 401,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -2128,9 +2128,6 @@
                         "description": "The API key is valid, but the account plan does not include the Address API product.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "PRODUCT_NOT_ALLOWED",
@@ -2138,6 +2135,9 @@
                                         "status": 403,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -2155,9 +2155,6 @@
                         },
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "RATE_LIMITED",
@@ -2165,6 +2162,9 @@
                                         "status": 429,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -2173,9 +2173,6 @@
                         "description": "The API could not complete the request because of an unexpected server-side failure.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "INTERNAL_ERROR",
@@ -2183,6 +2180,9 @@
                                         "status": 500,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -2284,9 +2284,6 @@
                         },
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/EnrichAddressResponse"
-                                },
                                 "example": {
                                     "id": "GAQLD156786950",
                                     "addressLabel": "9 ENDEAVOUR COURT",
@@ -2389,6 +2386,9 @@
                                             "addressLabel": "SHOP 1 1 MCNAB AVENUE"
                                         }
                                     ]
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/EnrichAddressResponse"
                                 }
                             }
                         }
@@ -2397,9 +2397,6 @@
                         "description": "The request query string is missing a required parameter or contains a value outside the documented format.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "INVALID_PARAMETERS",
@@ -2412,6 +2409,9 @@
                                             ]
                                         }
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -2420,9 +2420,6 @@
                         "description": "The request did not include a valid `X-Api-Key` header.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "MISSING_API_KEY",
@@ -2430,6 +2427,9 @@
                                         "status": 401,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -2438,9 +2438,6 @@
                         "description": "The API key is valid, but the account plan does not include the Address API product.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "PRODUCT_NOT_ALLOWED",
@@ -2448,6 +2445,9 @@
                                         "status": 403,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -2456,9 +2456,6 @@
                         "description": "The supplied `id` does not resolve to a current address document.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "NOT_FOUND",
@@ -2466,6 +2463,9 @@
                                         "status": 404,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -2483,9 +2483,6 @@
                         },
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "RATE_LIMITED",
@@ -2493,6 +2490,9 @@
                                         "status": 429,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -2501,9 +2501,6 @@
                         "description": "The API could not complete the request because of an unexpected server-side failure.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "INTERNAL_ERROR",
@@ -2511,6 +2508,9 @@
                                         "status": 500,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -2654,9 +2654,6 @@
                         },
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ReverseGeocodeAddressResponse"
-                                },
                                 "example": {
                                     "results": [
                                         {
@@ -2708,6 +2705,9 @@
                                         }
                                     ],
                                     "total": 1
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReverseGeocodeAddressResponse"
                                 }
                             }
                         }
@@ -2716,9 +2716,6 @@
                         "description": "The request query string is missing a required parameter or contains a value outside the documented format.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "INVALID_PARAMETERS",
@@ -2731,6 +2728,9 @@
                                             ]
                                         }
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -2739,9 +2739,6 @@
                         "description": "The request did not include a valid `X-Api-Key` header.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "MISSING_API_KEY",
@@ -2749,6 +2746,9 @@
                                         "status": 401,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -2757,9 +2757,6 @@
                         "description": "The API key is valid, but the account plan does not include the Address API product.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "PRODUCT_NOT_ALLOWED",
@@ -2767,6 +2764,9 @@
                                         "status": 403,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -2784,9 +2784,6 @@
                         },
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "RATE_LIMITED",
@@ -2794,6 +2791,9 @@
                                         "status": 429,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -2802,9 +2802,6 @@
                         "description": "The API could not complete the request because of an unexpected server-side failure.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "INTERNAL_ERROR",
@@ -2812,6 +2809,9 @@
                                         "status": 500,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -2927,9 +2927,6 @@
                         },
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/PostcodeLookupResponse"
-                                },
                                 "example": {
                                     "postcode": "2000",
                                     "localities": [
@@ -2939,6 +2936,9 @@
                                             "address_count": 12345
                                         }
                                     ]
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PostcodeLookupResponse"
                                 }
                             }
                         }
@@ -2947,9 +2947,6 @@
                         "description": "The request query string is missing a required parameter or contains a value outside the documented format.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "INVALID_PARAMETERS",
@@ -2962,6 +2959,9 @@
                                             ]
                                         }
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -2970,9 +2970,6 @@
                         "description": "The request did not include a valid `X-Api-Key` header.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "MISSING_API_KEY",
@@ -2980,6 +2977,9 @@
                                         "status": 401,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -2988,9 +2988,6 @@
                         "description": "The API key is valid, but the account plan does not include the Address API product.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "PRODUCT_NOT_ALLOWED",
@@ -2998,6 +2995,9 @@
                                         "status": 403,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -3015,9 +3015,6 @@
                         },
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "RATE_LIMITED",
@@ -3025,6 +3022,9 @@
                                         "status": 429,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -3033,9 +3033,6 @@
                         "description": "The API could not complete the request because of an unexpected server-side failure.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "INTERNAL_ERROR",
@@ -3043,6 +3040,9 @@
                                         "status": 500,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -3175,9 +3175,6 @@
                         },
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/SuburbLookupResponse"
-                                },
                                 "example": {
                                     "suburb": "SYDNEY",
                                     "state": "NSW",
@@ -3195,6 +3192,9 @@
                                         }
                                     },
                                     "address_count": 12345
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuburbLookupResponse"
                                 }
                             }
                         }
@@ -3203,9 +3203,6 @@
                         "description": "The request query string is missing a required parameter or contains a value outside the documented format.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "INVALID_PARAMETERS",
@@ -3218,6 +3215,9 @@
                                             ]
                                         }
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -3226,9 +3226,6 @@
                         "description": "The request did not include a valid `X-Api-Key` header.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "MISSING_API_KEY",
@@ -3236,6 +3233,9 @@
                                         "status": 401,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -3244,9 +3244,6 @@
                         "description": "The API key is valid, but the account plan does not include the Address API product.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "PRODUCT_NOT_ALLOWED",
@@ -3254,6 +3251,9 @@
                                         "status": 403,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -3271,9 +3271,6 @@
                         },
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "RATE_LIMITED",
@@ -3281,6 +3278,9 @@
                                         "status": 429,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
@@ -3289,9 +3289,6 @@
                         "description": "The API could not complete the request because of an unexpected server-side failure.",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AddressErrorResponse"
-                                },
                                 "example": {
                                     "error": {
                                         "code": "INTERNAL_ERROR",
@@ -3299,6 +3296,9 @@
                                         "status": 500,
                                         "request_id": "req_01HZX7A8J5K9P4R2QW3E6T7Y8Z"
                                     }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressErrorResponse"
                                 }
                             }
                         }
