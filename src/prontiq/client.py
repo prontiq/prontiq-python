@@ -5,7 +5,7 @@ import httpx
 from attrs import define, evolve, field
 
 
-@define
+@define(repr=False)
 class Client:
     """A class for keeping track of data related to the API
 
@@ -136,7 +136,7 @@ class Client:
         await self.get_async_httpx_client().__aexit__(*args, **kwargs)
 
 
-@define
+@define(repr=False)
 class AuthenticatedClient:
     """A Client which has been authenticated for use on secured endpoints
 

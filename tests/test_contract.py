@@ -1,10 +1,11 @@
 import json
+from contextlib import nullcontext
 from pathlib import Path
 
 import httpx
 import pytest
 
-from prontiq import AuthenticatedClient
+from prontiq import AuthenticatedClient, Client
 from prontiq.api.address import (
     autocomplete_address,
     enrich_address,
@@ -171,10 +172,29 @@ def test_documented_errors_preserve_status_and_request_id(status):
     assert response.parsed.to_dict() == payload
 
 
-def test_unexpected_status_raises():
-    with client_for(lambda _: httpx.Response(502, text="Bad gateway")) as client:
-        with pytest.raises(UnexpectedStatus):
-            enrich_address.sync_detailed(client=client, id="missing")
+@pytest.mark.parametrize("operation,path,params,payload", CASES)
+@pytest.mark.parametrize("status", [502, 599])
+@pytest.mark.parametrize("strict", [True, False])
+async def test_unexpected_status_handling(operation, path, params, payload, status, strict):
+    client = client_for(
+        lambda _: httpx.Response(status, text="Upstream error", headers={"Retry-After": "3"})
+    )
+    client.raise_on_unexpected_status = strict
+
+    def expected_result():
+        return pytest.raises(UnexpectedStatus) if strict else nullcontext()
+
+    def check_response(response):
+        assert response.status_code == status
+        assert response.parsed is None
+        assert response.content == b"Upstream error"
+        assert response.headers["Retry-After"] == "3"
+
+    with client, expected_result():
+        check_response(operation.sync_detailed(client=client, **params))
+    async with client:
+        with expected_result():
+            check_response(await operation.asyncio_detailed(client=client, **params))
 
 
 def test_missing_required_fallback_is_rejected():
@@ -182,3 +202,26 @@ def test_missing_required_fallback_is_rejected():
     del record["fallbackGeocode"]
     with pytest.raises(KeyError, match="fallbackGeocode"):
         AddressDocument.from_dict(record)
+
+
+@pytest.mark.parametrize("client_type", [Client, AuthenticatedClient])
+async def test_client_repr_does_not_expose_credentials(client_type):
+    secrets = ["audit-header", "audit-cookie", "audit-password", "audit-token"]
+    kwargs = {
+        "base_url": "https://api.test",
+        "headers": {"X-Api-Key": secrets[0]},
+        "cookies": {"session": secrets[1]},
+        "httpx_args": {"auth": ("audit-user", secrets[2])},
+    }
+    if client_type is AuthenticatedClient:
+        kwargs.update(token=secrets[3], auth_header_name="X-Api-Key", prefix="")
+    client = client_type(**kwargs)
+
+    def assert_safe_repr():
+        assert all(secret not in repr(client) for secret in secrets)
+
+    assert_safe_repr()
+    with client:
+        assert_safe_repr()
+    async with client:
+        assert_safe_repr()

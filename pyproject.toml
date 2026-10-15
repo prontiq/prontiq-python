@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = "Apache-2.0"
 authors = [{name = "Prontiq", email = "support@prontiq.dev"}]
-dependencies = ["httpx>=0.28,<1", "attrs>=25.3", "python-dateutil>=2.9"]
+dependencies = ["httpx>=0.28,<1", "attrs>=25.3"]
 
 [project.urls]
 Homepage = "https://prontiq.dev"
@@ -20,7 +20,7 @@ build-backend = "hatchling.build"
 packages = ["src/prontiq"]
 
 [dependency-groups]
-dev = ["openapi-python-client==0.29.1", "pytest>=8,<10", "pytest-asyncio>=1,<2", "ruff==0.15.6", "mypy>=1.18,<2", "types-python-dateutil>=2.9"]
+dev = ["openapi-python-client==0.29.1", "pytest>=8,<10", "pytest-asyncio>=1,<2", "ruff==0.15.6", "mypy>=1.18,<2"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
@@ -32,4 +32,5 @@ target-version = "py311"
 
 [tool.mypy]
 files = ["src/prontiq"]
+python_version = "3.11"
 strict = true

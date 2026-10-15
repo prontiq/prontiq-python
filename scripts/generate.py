@@ -11,6 +11,13 @@ from tempfile import TemporaryDirectory
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def replace_generated(path: Path, old: str, new: str) -> None:
+    source = path.read_text(encoding="utf-8")
+    if source.count(old) != 1:
+        raise SystemExit(f"Review generated {path.name}: expected one {old!r}")
+    path.write_text(source.replace(old, new), encoding="utf-8")
+
+
 def normalize_annotations(value: object) -> object:
     if isinstance(value, list):
         return [normalize_annotations(item) for item in value]
@@ -62,6 +69,27 @@ def main() -> None:
             cwd=ROOT,
             env={**os.environ, "RUFF_CACHE_DIR": str(Path(temp) / "ruff-cache")},
         )
+        # --meta none omits the marker needed by installed-package type checkers.
+        (output / "py.typed").touch()
+        # attrs' default repr exposes tokens and mutable transport credentials.
+        for name in ("Client", "AuthenticatedClient"):
+            replace_generated(
+                output / "client.py",
+                f"@define\nclass {name}:",
+                f"@define(repr=False)\nclass {name}:",
+            )
+        # HTTP permits codes absent from Python's enum; preserve the raw status.
+        replace_generated(output / "types.py", "from http import HTTPStatus\n", "")
+        replace_generated(output / "types.py", "status_code: HTTPStatus", "status_code: int")
+        for endpoint in (output / "api").rglob("*.py"):
+            if endpoint.name == "__init__.py":
+                continue
+            replace_generated(endpoint, "from http import HTTPStatus\n", "")
+            replace_generated(
+                endpoint,
+                "status_code=HTTPStatus(response.status_code)",
+                "status_code=response.status_code",
+            )
         target = ROOT / "src/prontiq"
         if args.check:
 
